@@ -33,6 +33,13 @@ import java.text.DecimalFormat;
 
 public class Servo
 {
+  public static int SIMPLEDYNAMIXEL_VERSION = 10; // 0010
+
+  static
+  {
+	System.out.println("SimpleDynamixel Version " + (SIMPLEDYNAMIXEL_VERSION / 100) + "." + (SIMPLEDYNAMIXEL_VERSION % 100));
+	System.out.flush();
+  }
 
     public static int DX_BEGIN				= 0xFF;
     public static int DX_BROADCAST_ID			= 0xFE;
