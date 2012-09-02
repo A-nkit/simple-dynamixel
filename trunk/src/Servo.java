@@ -146,16 +146,18 @@ public class Servo
     public Servo()
     {}
 
+/*
     public void init(Serial serial)
     {
         _serial = serial;
 		_serial.clear();
     }
-
+*/
     public void init(PApplet parent,String serialDev,int baudRate)
     {
         _serial = new Serial(parent,serialDev, baudRate);
 		_parent = parent;
+		_serial.clear();
     }
 
     public boolean setBaudrate(int id,int baudrate)
