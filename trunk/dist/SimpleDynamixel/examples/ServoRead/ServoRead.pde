@@ -54,7 +54,10 @@ void setup()
 	servoVizList[i] = new ServoViz(servo,servoList[i],servoRange,servoDeadAngle);
   }
 
-  vizRadius = (width - 2 * vizDist - (servoVizList.length -1) * vizDist) / servoVizList.length * .5f;
+  if(servoVizList.length == 1)
+	vizRadius = (height - 2 * vizDist) * .2f;
+  else
+	vizRadius = (width - 2 * vizDist - (servoVizList.length -1) * vizDist) / servoVizList.length * .5f;
 }
 
 void draw()
