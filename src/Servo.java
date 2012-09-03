@@ -148,6 +148,8 @@ public class Servo
     protected int				_timeout = 40;
     protected int				_delay = 2;
     protected ReturnPacket      _returnPacket = new ReturnPacket();
+	protected boolean			_regWriteFlag = false;
+	protected int 				_regWriteDelay = 2;
 	PApplet						_parent;
 
     public Servo()
@@ -216,7 +218,6 @@ public class Servo
         return handleReturnStatus(id);
     }
 
-
     public int[] pingAll()
     {
         ArrayList<Integer> servoList = new ArrayList<Integer>();
@@ -241,7 +242,7 @@ public class Servo
             end = DX_LAST_ID;
 
         ArrayList<Integer> servoList = new ArrayList<Integer>();
-        for(int i=start; i < end; i++)
+        for(int i=start; i <= end; i++)
         {
             if(ping(i))
                 servoList.add(i);
@@ -253,14 +254,72 @@ public class Servo
 
         return retArray;
     }
+	
+    protected boolean action(int id)
+    {
+        _curChecksum = 0;
 
+        _serial.write(DX_BEGIN);
+        _serial.write(DX_BEGIN);
+
+        // id
+        _serial.write(id);
+        _curChecksum += id;
+
+        // length
+        _serial.write(2);
+        _curChecksum += 2;
+
+        // instruction
+        _serial.write(DX_INST_ACTION);
+        _curChecksum += DX_INST_ACTION;
+
+        // no param
+
+        // checksum
+        _serial.write(calcChecksum(_curChecksum));
+
+		/*
+        // handle reply
+        return handleReturnStatus(id);
+		*/
+
+		return true;
+    }
+
+	public void beginRegWrite()
+	{
+	  _regWriteFlag = true;
+	}
+
+	public boolean endRegWrite()
+	{
+	  _regWriteFlag = false;
+	  return action(DX_BROADCAST_ID);
+	}
+
+	public void beginSyncWrite()
+	{
+
+	}
+
+	public boolean endSyncWrite()
+	{
+	  return false;
+	}
 
     public boolean setAngleLimitCW(int id,int limit)
     {
-        writeData2Bytes(id,DX_CMD_CW_ANGLE_LIMIT,limit);
+        writeData2Bytes(id,DX_CMD_CW_ANGLE_LIMIT,limit,_regWriteFlag);
 
         // handle reply
-        return handleReturnStatus(id);
+		if(_regWriteFlag)
+		{
+		  locSleep(_regWriteDelay);
+		  return true;
+		}
+		else
+		  return handleReturnStatus(id);
     }
 
     public int angleLimitCW(int id)
@@ -278,10 +337,16 @@ public class Servo
 
     public boolean setAngleLimitCCW(int id,int limit)
     {
-        writeData2Bytes(id,DX_CMD_CCW_ANGLE_LIMIT,limit);
+        writeData2Bytes(id,DX_CMD_CCW_ANGLE_LIMIT,limit,_regWriteFlag);
 
         // handle reply
-        return handleReturnStatus(id);
+		if(_regWriteFlag)
+		{
+		  locSleep(_regWriteDelay);
+		  return true;
+		}
+		else
+		  return handleReturnStatus(id);
     }
 
     public int angleLimitCCW(int id)
@@ -299,18 +364,30 @@ public class Servo
 
     public boolean setMovingSpeed(int id,int speed)
     {
-        writeData2Bytes(id,DX_CMD_MOV_SPEED,speed);
+        writeData2Bytes(id,DX_CMD_MOV_SPEED,speed,_regWriteFlag);
 
         // handle reply
-        return handleReturnStatus(id);
+		if(_regWriteFlag)
+		{
+		  locSleep(_regWriteDelay);
+		  return true;
+		}
+		else
+		  return handleReturnStatus(id);
     }
 
     public boolean setGoalPosition(int id,int pos)
     {
-        writeData2Bytes(id,DX_CMD_GOAL_POS,pos);
+        writeData2Bytes(id,DX_CMD_GOAL_POS,pos,_regWriteFlag);
 
         // handle reply
-        return handleReturnStatus(id);
+		if(_regWriteFlag)
+		{
+		  locSleep(_regWriteDelay);
+		  return true;
+		}
+		else
+		  return handleReturnStatus(id);
     }
 
     public int goalPostition(int id)
@@ -410,12 +487,18 @@ public class Servo
 	public boolean setTorqueEnable(int id,boolean enable)
 	{
 	  if(enable)
-		writeDataByte(id,DX_CMD_TORQUE_ENABLE,1);
+		writeDataByte(id,DX_CMD_TORQUE_ENABLE,1,_regWriteFlag);
 	  else
-		writeDataByte(id,DX_CMD_TORQUE_ENABLE,0);
+		writeDataByte(id,DX_CMD_TORQUE_ENABLE,0,_regWriteFlag);
 
 	  // handle reply
-       return handleReturnStatus(id);
+		if(_regWriteFlag)
+		{
+		  locSleep(_regWriteDelay);
+		  return true;
+		}
+		else
+		  return handleReturnStatus(id);
 	}
 	
 	public boolean torqueEnable(int id)
@@ -434,12 +517,18 @@ public class Servo
 	public boolean setLed(int id,boolean enable)
 	{
 	  if(enable)
-		writeDataByte(id,DX_CMD_LED_ENABLE,1);
+		writeDataByte(id,DX_CMD_LED_ENABLE,1,_regWriteFlag);
 	  else
-		writeDataByte(id,DX_CMD_LED_ENABLE,0);
+		writeDataByte(id,DX_CMD_LED_ENABLE,0,_regWriteFlag);
 
 	  // handle reply
-       return handleReturnStatus(id);
+		if(_regWriteFlag)
+		{
+		  locSleep(_regWriteDelay);
+		  return true;
+		}
+		else
+		  return handleReturnStatus(id);
 	}
 	
 	public boolean led(int id)
@@ -455,8 +544,12 @@ public class Servo
             return false;
 	}
 
-
     protected boolean writeData2Bytes(int id,int addr,int data)
+    {
+	  return writeData2Bytes(id, addr, data, false);
+	}
+  
+    protected boolean writeData2Bytes(int id,int addr,int data,boolean regWrite)
     {
         _curChecksum = 0;
 
@@ -472,8 +565,16 @@ public class Servo
         _curChecksum += 2 + 3;  // 3 bytes param
 
         // instruction
-        _serial.write(DX_INST_WRITE_DATA);
-        _curChecksum += DX_INST_WRITE_DATA;
+		if(regWrite)
+		{
+		  _serial.write(DX_INST_REG_WRITE);
+		  _curChecksum += DX_INST_REG_WRITE;
+		}
+		else
+		{
+		  _serial.write(DX_INST_WRITE_DATA);
+		  _curChecksum += DX_INST_WRITE_DATA;
+		}
 
         // param - addr
         _serial.write(addr);
@@ -493,6 +594,11 @@ public class Servo
 
 
     protected boolean writeDataByte(int id,int addr,int data)
+    {    
+	  return writeDataByte(id, addr, data, false);
+	}
+
+	protected boolean writeDataByte(int id,int addr,int data,boolean regWrite)
     {
         _curChecksum = 0;
 
@@ -508,8 +614,16 @@ public class Servo
         _curChecksum += 2 + 2;  // 3 bytes param
 
         // instruction
-        _serial.write(DX_INST_WRITE_DATA);
-        _curChecksum += DX_INST_WRITE_DATA;
+		if(regWrite)
+		{
+		  _serial.write(DX_INST_REG_WRITE);
+		  _curChecksum += DX_INST_REG_WRITE;
+		}
+		else
+		{
+		  _serial.write(DX_INST_WRITE_DATA);
+		  _curChecksum += DX_INST_WRITE_DATA;
+		}
 
         // param - addr
         _serial.write(addr);
@@ -523,8 +637,6 @@ public class Servo
 
         return true;
     }
-
-
 
     protected boolean readData(int id,int addr,int readLength)
     {
