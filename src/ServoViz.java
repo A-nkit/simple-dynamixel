@@ -78,7 +78,7 @@ public class ServoViz
 
   public void readTempValues()
   {
-	int curPos = _servo.presentPostition(_id);
+	int curPos = _servo.presentPosition(_id);
 	if(curPos >= 0)
 	  _pos = curPos;
   }
@@ -166,7 +166,7 @@ public class ServoViz
         g.text("id: " + _id, posX,posY);
 
 		posY += 20;
-        g.text("angle: " + Float.parseFloat(df.format(Math.toDegrees(angle))), posX,posY);
+        g.text("angle: " + Float.parseFloat(df.format(Math.toDegrees(_resQ * _pos))), posX,posY);
 
 		posY += 20;
         g.text("pos: " + _pos, posX, posY);

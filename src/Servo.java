@@ -55,11 +55,14 @@ public class Servo
     // errors
     public static int DX_ERROR_INVOLT			= 1 << 0;
     public static int DX_ERROR_ANGLELIMIT		= 1 << 1;
-    public static int DX_ERROR_OVERHEAT		= 1 << 2;
+    public static int DX_ERROR_OVERHEAT			= 1 << 2;
     public static int DX_ERROR_RANGE			= 1 << 3;
-    public static int DX_ERROR_CHECKSUM		= 1 << 4;
-    public static int DX_ERROR_OVERLOAD		= 1 << 5;
-    public static int DX_ERROR_INST			= 1 << 6;
+    public static int DX_ERROR_CHECKSUM			= 1 << 4;
+    public static int DX_ERROR_OVERLOAD			= 1 << 5;
+    public static int DX_ERROR_INST				= 1 << 6;
+
+    public static int DX_ERROR_USR_ID			= 1 << 10;
+    public static int DX_ERROR_USR_READSTATUS	= 1 << 11;
 
     // Instructions
     public static int DX_INST_PING			= 0x01;
@@ -141,16 +144,18 @@ public class Servo
     }
 
 
-    protected Serial 			_serial;
-    protected ArrayList<Integer> 	        _data;
-    protected int				_curChecksum;
-    protected int				_error;
-    protected int				_timeout = 40;
-    protected int				_delay = 2;
-    protected ReturnPacket      _returnPacket = new ReturnPacket();
-	protected boolean			_regWriteFlag = false;
-	protected int 				_regWriteDelay = 2;
-	PApplet						_parent;
+    protected Serial 				_serial;
+    protected ArrayList<Integer>	_data;
+    protected int					_curChecksum;
+    protected int					_error;
+    protected int					_timeout = 100;	
+    protected int					_delay = 1;
+    protected ReturnPacket      	_returnPacket = new ReturnPacket();
+	protected boolean				_regWriteFlag = false;
+	protected int 					_regWriteDelay = 2;
+	protected ArrayList<Integer>	_regWriteIdList;
+	PApplet							_parent;
+	
 
     public Servo()
     {}
@@ -167,7 +172,11 @@ public class Servo
         _serial = new Serial(parent,serialDev, baudRate);
 		_parent = parent;
 		_serial.clear();
+
+		_regWriteIdList = new ArrayList<Integer>();
     }
+
+	public Serial serial() { return _serial; }
 
     public boolean setBaudrate(int id,int baudrate)
     {
@@ -190,7 +199,13 @@ public class Servo
             return -1;
     }
 
-    public boolean ping(int id)
+/*
+    public synchronized boolean ping(int id,int timeout)
+	{
+
+	}
+*/
+    public synchronized boolean ping(int id)
     {
         _curChecksum = 0;
 
@@ -215,10 +230,15 @@ public class Servo
         _serial.write(calcChecksum(_curChecksum));
 
         // handle reply
-        return handleReturnStatus(id);
+		int oldTimeout = _timeout;
+		_timeout = 20;
+        boolean ret = handleReturnStatus(id);
+		_timeout = oldTimeout;
+
+		return ret;
     }
 
-    public int[] pingAll()
+    public synchronized int[] pingAll()
     {
         ArrayList<Integer> servoList = new ArrayList<Integer>();
         for(int i=0; i < DX_LAST_ID; i++)
@@ -234,7 +254,7 @@ public class Servo
         return retArray;
     }
 
-    public int[] pingRange(int start, int end)
+    public synchronized int[] pingRange(int start, int end)
     {
         if(start > DX_LAST_ID)
             start = DX_LAST_ID;
@@ -255,7 +275,7 @@ public class Servo
         return retArray;
     }
 	
-    protected boolean action(int id)
+    public synchronized boolean action(int id)
     {
         _curChecksum = 0;
 
@@ -279,23 +299,42 @@ public class Servo
         // checksum
         _serial.write(calcChecksum(_curChecksum));
 
-		/*
-        // handle reply
-        return handleReturnStatus(id);
-		*/
-
-		return true;
+		if(id != DX_BROADCAST_ID)
+		  // handle reply
+		  return handleReturnStatus(id);
+		else
+		  return true;
     }
 
-	public void beginRegWrite()
+	public synchronized void beginRegWrite()
 	{
+	  if(_regWriteFlag == true)
+		return;
+
 	  _regWriteFlag = true;
+	  _regWriteIdList.clear();
 	}
 
-	public boolean endRegWrite()
+	public synchronized boolean endRegWrite()
 	{
+	  if(_regWriteFlag == false)
+		return false;
+
 	  _regWriteFlag = false;
-	  return action(DX_BROADCAST_ID);
+	  // activate the commands
+	  action(DX_BROADCAST_ID);
+
+	  // hande status packets
+	  for(int i=0;i < _regWriteIdList.size();i++)
+	  {
+		if(handleReturnStatus())
+		{
+		  if(_regWriteIdList.contains(_returnPacket.id) == false)
+			return false;
+		}
+	  }
+
+	  return true;
 	}
 
 	public void beginSyncWrite()
@@ -315,6 +354,7 @@ public class Servo
         // handle reply
 		if(_regWriteFlag)
 		{
+		  _regWriteIdList.add(id);
 		  locSleep(_regWriteDelay);
 		  return true;
 		}
@@ -342,6 +382,7 @@ public class Servo
         // handle reply
 		if(_regWriteFlag)
 		{
+		  _regWriteIdList.add(id);
 		  locSleep(_regWriteDelay);
 		  return true;
 		}
@@ -369,6 +410,7 @@ public class Servo
         // handle reply
 		if(_regWriteFlag)
 		{
+		  _regWriteIdList.add(id);
 		  locSleep(_regWriteDelay);
 		  return true;
 		}
@@ -383,6 +425,7 @@ public class Servo
         // handle reply
 		if(_regWriteFlag)
 		{
+		  _regWriteIdList.add(id);
 		  locSleep(_regWriteDelay);
 		  return true;
 		}
@@ -390,7 +433,7 @@ public class Servo
 		  return handleReturnStatus(id);
     }
 
-    public int goalPostition(int id)
+    public int goalPosition(int id)
     {
         readData(id,DX_CMD_GOAL_POS,2);
         if(handleReturnStatus(id))
@@ -404,14 +447,26 @@ public class Servo
             return -1;
     }
 	
-    public int presentPostition(int id)
+    public int presentPosition(int id)
     {
+/*
+        readData(id,DX_CMD_PRESENT_POS,2);
+long startTime = System.currentTimeMillis();	
+        if(handleReturnStatus(id))
+        {
+System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
+            if(_returnPacket.param.size() != 2)
+			  return -1;
+            return((_returnPacket.param.get(1).intValue() << 8) + _returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+*/
         readData(id,DX_CMD_PRESENT_POS,2);
         if(handleReturnStatus(id))
         {
             if(_returnPacket.param.size() != 2)
-                return -1;
-            // System.out.println(_returnPacket.toString());
+			  return -1;
             return((_returnPacket.param.get(1).intValue() << 8) + _returnPacket.param.get(0).intValue());
         }
         else
@@ -472,7 +527,7 @@ public class Servo
 		
     public boolean moving(int id)
     {
-        readData(id,DX_CMD_PRESENT_TEMP,1);
+        readData(id,DX_CMD_MOVING,1);
         if(handleReturnStatus(id))
         {
             if(_returnPacket.param.size() != 1)
@@ -494,6 +549,7 @@ public class Servo
 	  // handle reply
 		if(_regWriteFlag)
 		{
+		  _regWriteIdList.add(id);
 		  locSleep(_regWriteDelay);
 		  return true;
 		}
@@ -524,6 +580,7 @@ public class Servo
 	  // handle reply
 		if(_regWriteFlag)
 		{
+		  _regWriteIdList.add(id);
 		  locSleep(_regWriteDelay);
 		  return true;
 		}
@@ -544,12 +601,12 @@ public class Servo
             return false;
 	}
 
-    protected boolean writeData2Bytes(int id,int addr,int data)
+    protected synchronized boolean writeData2Bytes(int id,int addr,int data)
     {
 	  return writeData2Bytes(id, addr, data, false);
 	}
   
-    protected boolean writeData2Bytes(int id,int addr,int data,boolean regWrite)
+    protected synchronized boolean writeData2Bytes(int id,int addr,int data,boolean regWrite)
     {
         _curChecksum = 0;
 
@@ -593,12 +650,12 @@ public class Servo
     }
 
 
-    protected boolean writeDataByte(int id,int addr,int data)
+    protected synchronized boolean writeDataByte(int id,int addr,int data)
     {    
 	  return writeDataByte(id, addr, data, false);
 	}
 
-	protected boolean writeDataByte(int id,int addr,int data,boolean regWrite)
+	protected synchronized boolean writeDataByte(int id,int addr,int data,boolean regWrite)
     {
         _curChecksum = 0;
 
@@ -638,7 +695,7 @@ public class Servo
         return true;
     }
 
-    protected boolean readData(int id,int addr,int readLength)
+    protected  boolean readData(int id,int addr,int readLength)
     {
         _curChecksum = 0;
 
@@ -669,23 +726,48 @@ public class Servo
         return true;
 
     }
+	
+	public int lastError() { return _error; }
+
+	public ReturnPacket returnPacket() { return _returnPacket; }
 
     protected boolean handleReturnStatus(int id)
     {
         if(readStatus(_returnPacket) == false)
-            return false;
+        {
+		  _error = DX_ERROR_USR_READSTATUS;
+		  return false;
+		}
 
         _error = _returnPacket.error;
         if(_returnPacket.id != id || _error != 0)
-            return false;
+        {
+		  _error |= DX_ERROR_USR_ID;
+		  return false;
+		}
         else
             return true;
     }
 
-    protected boolean readStatus(ReturnPacket returnPacket)
+    protected boolean handleReturnStatus()
+    {
+        if(readStatus(_returnPacket) == false)
+        {
+		  _error = DX_ERROR_USR_READSTATUS;
+		  return false;
+		}
+
+        _error = _returnPacket.error;
+        return true;
+    }
+
+    protected synchronized boolean readStatus(ReturnPacket returnPacket)
     {
         if(readStart(_timeout) == false)
             return false;
+
+		if(waitForData(_serial,_timeout,_delay,3) == false)
+		  return false;
 
         _curChecksum = 0;
 
@@ -694,9 +776,13 @@ public class Servo
 
         // read length
         returnPacket.length = _serial.read();
-
+		
         // read error
         returnPacket.error = _serial.read();
+
+		// wait for the rest of the data
+		if(waitForData(_serial,_timeout,_delay,returnPacket.length - 1) == false)
+		  return false;
 
         // read param
         returnPacket.param.clear();
@@ -713,6 +799,7 @@ public class Servo
 		int origTimeout = timeout;
 		int failCount = 30;
 
+		// read all the data till the first 0xff
 		timeout = origTimeout;
 		while(failCount > 0)
 		{
@@ -721,7 +808,7 @@ public class Servo
 			return false;
 
 		  if(_serial.read() == DX_BEGIN)
-			  break;
+			break;
 		  else
 			failCount--;
 		}
@@ -733,6 +820,7 @@ public class Servo
 
         if(_serial.read() != DX_BEGIN)
             return false;
+
 
 		// data
 		timeout = origTimeout;
