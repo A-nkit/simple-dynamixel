@@ -1,0 +1,134 @@
+/* ----------------------------------------------------------------------------
+ * SimpleDynamixel
+ * ----------------------------------------------------------------------------
+ * Copyright (C) 2011 Max Rheiner / Interaction Design Zhdk
+ *
+ * This file is part of SimpleDynamixel.
+ *
+ * SimpleOpenNI is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version (subject to the "Classpath" exception
+ * as provided in the LICENSE.txt file that accompanied this code).
+ *
+ * SimpleOpenNI is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with SimpleDynamixel.  If not, see <http://www.gnu.org/licenses/>.
+ * ----------------------------------------------------------------------------
+ */
+
+#include "SerialBase.h"
+
+
+SerialBase::SerialBase():
+    _open(false),
+    _serialPort(NULL),
+    _circularBuffer(MAX_BUFFER_SIZE)
+{}
+
+SerialBase::~SerialBase()
+{
+    close();
+}
+
+
+bool SerialBase::open(const char* serialPortName,unsigned long baudRate)
+{
+    if(_open)
+        return true;
+
+    try{
+        _serialPort = new CallbackAsyncSerial(std::string(serialPortName),baudRate);
+        _serialPort->setCallback(boost::bind( &SerialBase::received,this,_1,_2 ));
+    }
+    catch(std::exception& e)
+    {
+        std::cout << "SerialBase Error: " << e.what() << std::endl;
+        return false;
+    }
+
+    _open = true;
+    _circularBuffer.clear();
+    return _open;
+}
+
+void SerialBase::close()
+{
+    boost::mutex::scoped_lock l1(_readMutex);
+    boost::mutex::scoped_lock l2(_writeMutex);
+
+    if(_serialPort)
+    {
+        _serialPort->close();
+        delete _serialPort;
+        _serialPort = NULL;
+    }
+
+    _circularBuffer.clear();
+    _open = false;
+}
+
+int SerialBase::available()
+{
+    boost::mutex::scoped_lock l(_readMutex);
+
+    return _circularBuffer.size();
+}
+
+void SerialBase::write(unsigned char byte)
+{
+    if(!_open)
+        return;
+
+    boost::mutex::scoped_lock l(_writeMutex);
+
+    _serialPort->write((char*)&byte,1);
+}
+
+void SerialBase::write(int byte)
+{
+    write((unsigned char)byte);
+}
+
+void SerialBase::write(const std::string& str)
+{
+    if(!_open)
+        return;
+
+    boost::mutex::scoped_lock l(_writeMutex);
+
+    _serialPort->writeString(str);
+}
+
+int SerialBase::read()
+{
+    if(!_open)
+        return 0;
+
+    boost::mutex::scoped_lock l(_readMutex);
+
+    unsigned char ret = _circularBuffer.front();
+    _circularBuffer.pop_front();
+    return (int)ret;
+}
+
+
+void SerialBase::clear()
+{
+    boost::mutex::scoped_lock l(_readMutex);
+
+    _circularBuffer.clear();
+
+}
+
+void SerialBase::received(const char *data, unsigned int len)
+{
+    boost::mutex::scoped_lock l(_readMutex);
+
+    for(int i=0;i < len;i++)
+        _circularBuffer.push_back(data[i]);
+}
