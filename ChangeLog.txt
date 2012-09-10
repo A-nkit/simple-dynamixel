@@ -1,0 +1,8 @@
+ChangeLog - SimpleDynamixel
+------------------------
+http://code.google.com/p/simple-dynamixel/
+
+vx.xx status, mm/dd/yyyy
+
+v0.xx , in planning:
+		- 
