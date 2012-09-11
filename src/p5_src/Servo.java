@@ -34,7 +34,7 @@ import java.text.DecimalFormat;
 
 public class Servo
 {
-  public static int SIMPLEDYNAMIXEL_VERSION = 11; // 0011
+  public final static int SIMPLEDYNAMIXEL_VERSION = 11; // 0011
 
   static
   {
@@ -86,73 +86,95 @@ public class Servo
 
   }
 
-    public static int DX_BEGIN				= 0xFF;
-    public static int DX_BROADCAST_ID			= 0xFE;
+    public final static int DX_BEGIN			= 0xFF;
+    public final static int DX_BROADCAST_ID		= 0xFE;
 
-    public static int DX_LAST_ID                          = 0xFD;
+    public final static int DX_LAST_ID                  = 0xFD;
 
     // return values
-    public static int DX_RET_OK				= 0;
-    public static int DX_RET_ERROR_LEN		= 1;  // return package has wrong size
-    public static int DX_RET_ERROR_START		= 2;  // can't find start
-    public static int DX_RET_ERROR_CHECKSUM	= 3;  // can't find start
+    public final static int DX_RET_OK			= 0;
+    public final static int DX_RET_ERROR_LEN		= 1;  // return package has wrong size
+    public final static int DX_RET_ERROR_START		= 2;  // can't find start
+    public final static int DX_RET_ERROR_CHECKSUM	= 3;  // can't find start
 
     // errors
-    public static int DX_ERROR_INVOLT			= 1 << 0;
-    public static int DX_ERROR_ANGLELIMIT		= 1 << 1;
-    public static int DX_ERROR_OVERHEAT			= 1 << 2;
-    public static int DX_ERROR_RANGE			= 1 << 3;
-    public static int DX_ERROR_CHECKSUM			= 1 << 4;
-    public static int DX_ERROR_OVERLOAD			= 1 << 5;
-    public static int DX_ERROR_INST				= 1 << 6;
+    public final static int DX_ERROR_INVOLT		= 1 << 0;
+    public final static int DX_ERROR_ANGLELIMIT		= 1 << 1;
+    public final static int DX_ERROR_OVERHEAT		= 1 << 2;
+    public final static int DX_ERROR_RANGE		= 1 << 3;
+    public final static int DX_ERROR_CHECKSUM		= 1 << 4;
+    public final static int DX_ERROR_OVERLOAD		= 1 << 5;
+    public final static int DX_ERROR_INST		= 1 << 6;
 
-    public static int DX_ERROR_USR_ID			= 1 << 10;
-    public static int DX_ERROR_USR_READSTATUS	= 1 << 11;
+    public final static int DX_ERROR_USR_ID		= 1 << 10;
+    public final static int DX_ERROR_USR_READSTATUS     = 1 << 11;
 
     // Instructions
-    public static int DX_INST_PING			= 0x01;
-    public static int DX_INST_READ_DATA                 = 0x02;
-    public static int DX_INST_WRITE_DATA		= 0x03;
-    public static int DX_INST_REG_WRITE                 = 0x04;
-    public static int DX_INST_ACTION			= 0x05;
-    public static int DX_INST_RESET			= 0x06;
-    public static int DX_INST_SYNC_WRITE		= 0x83;
+    public final static int DX_INST_PING		= 0x01;
+    public final static int DX_INST_READ_DATA           = 0x02;
+    public final static int DX_INST_WRITE_DATA		= 0x03;
+    public final static int DX_INST_REG_WRITE           = 0x04;
+    public final static int DX_INST_ACTION		= 0x05;
+    public final static int DX_INST_RESET		= 0x06;
+    public final static int DX_INST_SYNC_WRITE		= 0x83;
 
     // commands
-    public static int DX_CMD_MODELNR			= 0x00;
-    public static int DX_CMD_FIRMWARE			= 0x02;
-    public static int DX_CMD_ID 			= 0x03;
-    public static int DX_CMD_BAUDRATE			= 0x04;
-    public static int DX_CMD_DELAYTIME			= 0x05;
-    public static int DX_CMD_CW_ANGLE_LIMIT		= 0x06;
-    public static int DX_CMD_CCW_ANGLE_LIMIT            = 0x08;
-    public static int DX_CMD_STATUSRETURNLEVEL          = 0x10;
-    public static int DX_CMD_TORQUE_ENABLE		= 0x18;
-    public static int DX_CMD_LED_ENABLE			= 0x19;
-    public static int DX_CMD_D_GAIN			= 0x1A;
-    public static int DX_CMD_I_GAIN			= 0x1B;
-    public static int DX_CMD_P_GAIN			= 0x1C;
-    public static int DX_CMD_GOAL_POS			= 0x1E;
-    public static int DX_CMD_MOV_SPEED			= 0x20;
-    public static int DX_CMD_PRESENT_POS		= 0x24;
-    public static int DX_CMD_PRESENT_SPEED		= 0x26;
-    public static int DX_CMD_PRESENT_LOAD		= 0x28;
-    public static int DX_CMD_PRESENT_VOLT		= 0x2A;
-    public static int DX_CMD_PRESENT_TEMP		= 0x2B;
+    public final static int DX_CMD_MODELNR		= 0x00;
+    public final static int DX_CMD_FIRMWARE		= 0x02;
+    public final static int DX_CMD_ID 			= 0x03;
+    public final static int DX_CMD_BAUDRATE		= 0x04;
+    public final static int DX_CMD_DELAYTIME		= 0x05;
+    public final static int DX_CMD_CW_ANGLE_LIMIT	= 0x06;
+    public final static int DX_CMD_CCW_ANGLE_LIMIT      = 0x08;
+    public final static int DX_CMD_STATUSRETURNLEVEL    = 0x10;
+    public final static int DX_CMD_TORQUE_ENABLE	= 0x18;
+    public final static int DX_CMD_LED_ENABLE		= 0x19;
+    public final static int DX_CMD_D_GAIN		= 0x1A;
+    public final static int DX_CMD_I_GAIN		= 0x1B;
+    public final static int DX_CMD_P_GAIN		= 0x1C;
+    public final static int DX_CMD_GOAL_POS		= 0x1E;
+    public final static int DX_CMD_MOV_SPEED		= 0x20;
+    public final static int DX_CMD_PRESENT_POS		= 0x24;
+    public final static int DX_CMD_PRESENT_SPEED	= 0x26;
+    public final static int DX_CMD_PRESENT_LOAD		= 0x28;
+    public final static int DX_CMD_PRESENT_VOLT		= 0x2A;
+    public final static int DX_CMD_PRESENT_TEMP		= 0x2B;
 
-    public static int DX_CMD_MAX_TORQUE			= 0x0E;
+    public final static int DX_CMD_MAX_TORQUE		= 0x0E;
 
-    public static int DX_CMD_COMPLIANCE_MARGIN_CW	= 0x1A;
-    public static int DX_CMD_COMPLIANCE_MARGIN_CCW	= 0x1B;
+    public final static int DX_CMD_COMPLIANCE_MARGIN_CW	= 0x1A;
+    public final static int DX_CMD_COMPLIANCE_MARGIN_CCW= 0x1B;
 
-    public static int DX_CMD_COMPLIANCE_SLOPE_CW	= 0x1C;
-    public static int DX_CMD_COMPLIANCE_SLOPE_CCW	= 0x1D;
+    public final static int DX_CMD_COMPLIANCE_SLOPE_CW	= 0x1C;
+    public final static int DX_CMD_COMPLIANCE_SLOPE_CCW	= 0x1D;
 
-    public static int DX_CMD_MOVING			= 0x2E;
-    public static int DX_CMD_PUNCH			= 0x30;
+    public final static int DX_CMD_MOVING		= 0x2E;
+    public final static int DX_CMD_PUNCH		= 0x30;
 
-    public static int DX_DIR_CCW          	= 0;
-    public static int DX_DIR_CW           	= 1;
+    public final static int DX_DIR_CCW                  = 0;
+    public final static int DX_DIR_CW                   = 1;
+
+    public final static int DX_MOTOR_SERIE_MX          	= 0;
+    public final static int DX_MOTOR_SERIE_AX          	= 1;
+    public final static int DX_MOTOR_SERIE_RX          	= 2;
+    public final static int DX_MOTOR_SERIE_EX          	= 3;
+    public final static int DX_MOTOR_SERIE_DX          	= 4;
+
+    public final static int DX_TYPE_DX_113              = 0x0071;
+    public final static int DX_TYPE_DX_116              = 0x0074;
+    public final static int DX_TYPE_DX_117              = 0x0075;
+    public final static int DX_TYPE_AX_12W              = 0x012C;
+    public final static int DX_TYPE_AX_12              	= 0x000C;
+    public final static int DX_TYPE_AX_18              	= 0x0012;
+    public final static int DX_TYPE_RX_10              	= 0x000A;
+    public final static int DX_TYPE_RX_24F              = 0x00184;
+    public final static int DX_TYPE_RX_28              	= 0x001C;
+    public final static int DX_TYPE_RX_64              	= 0x0040;
+    public final static int DX_TYPE_EX_104              = 0x006B;
+    public final static int DX_TYPE_MX_28              	= 0x001D;
+    public final static int DX_TYPE_MX_64              	= 0x0136;
+    public final static int DX_TYPE_MX_106              = 0x0140;
+
 
     class ReturnPacket
     {
@@ -255,6 +277,7 @@ public class Servo
     protected ReturnPacket                              _returnPacket = new ReturnPacket();
     protected boolean                                   _regWriteFlag = false;
     protected int 					_regWriteDelay = 2;
+
     PApplet						_parent;
 	
 
@@ -286,6 +309,72 @@ public class Servo
 
     public SerialWrapper serial() { return _serial; }
 
+
+    public final static int getMotorSerie(int modelNr)
+    {
+        switch(modelNr)
+        {
+        // dx
+        case DX_TYPE_DX_113:
+        case DX_TYPE_DX_116:
+        case DX_TYPE_DX_117:
+            return DX_MOTOR_SERIE_DX;
+        // ax
+        case DX_TYPE_AX_12W:
+        case DX_TYPE_AX_12:
+        case DX_TYPE_AX_18:
+            return DX_MOTOR_SERIE_AX;
+        // rx
+        case DX_TYPE_RX_10:
+        case DX_TYPE_RX_24F:
+        case DX_TYPE_RX_28:
+        case DX_TYPE_RX_64:
+            return DX_MOTOR_SERIE_RX;
+        // ex
+        case DX_TYPE_EX_104:
+            return DX_MOTOR_SERIE_EX;
+        // mx
+        case DX_TYPE_MX_28:
+        case DX_TYPE_MX_64:
+        case DX_TYPE_MX_106:
+            return DX_MOTOR_SERIE_MX;
+        default:
+            return -1;
+        }
+    }
+
+    public final static int getMotorRange(int modelNr)
+    {
+        switch(modelNr)
+        {
+        // dx
+        case DX_TYPE_DX_113:
+        case DX_TYPE_DX_116:
+        case DX_TYPE_DX_117:
+            return 0x3FF;
+        // ax
+        case DX_TYPE_AX_12W:
+        case DX_TYPE_AX_12:
+        case DX_TYPE_AX_18:
+            return 0x3FF;
+        // rx
+        case DX_TYPE_RX_10:
+        case DX_TYPE_RX_24F:
+        case DX_TYPE_RX_28:
+        case DX_TYPE_RX_64:
+            return 0x3FF;
+        // ex
+        case DX_TYPE_EX_104:
+            return 0xFFF;
+        // mx
+        case DX_TYPE_MX_28:
+        case DX_TYPE_MX_64:
+        case DX_TYPE_MX_106:
+            return 0xFFF;
+        default:
+            return 0;
+        }
+    }
 
     public int modelNr(int id)
     {
@@ -664,6 +753,26 @@ public class Servo
         }
 */
         return syncWrite(DX_CMD_TORQUE_ENABLE,1,idList,dataList);
+    }
+
+    public boolean setWheelMode(int id,boolean enable,int modelNr)
+    {
+        if(enable)
+        {   // on
+            return setAngleLimitCW(id,0) &&
+                   setAngleLimitCCW(id,0);
+        }
+        else
+        {   // off
+            return setAngleLimitCW(id,0) &&
+                   setAngleLimitCCW(id,getMotorRange(modelNr));
+            /*
+            // mx etc...
+            setAngleLimitCCW(id,0xFFF);
+            // ax etc...
+            setAngleLimitCCW(id,0x3FF);
+            */
+        }
     }
 
     public boolean setAngleLimitCW(int id,int limit)
@@ -1219,7 +1328,7 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
 		return true;
 	}
 
-    public static int calcChecksum(int checksumVal)
+    public final static int calcChecksum(int checksumVal)
     {
         return(0xFF & ~checksumVal);
     }
