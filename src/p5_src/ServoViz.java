@@ -51,6 +51,10 @@ public class ServoViz
 
   protected int _vizType = VIZ_FAST;
   protected float	_resQ;
+
+  protected int         _error = Servo.DX_ERROR_NO;
+
+  protected PVector     _bknColor = new PVector(255,255,255);
   
   public ServoViz(Servo servo,int id,int range,int deadAngle)
   {
@@ -76,11 +80,30 @@ public class ServoViz
 	_limitCCW	 = _servo.angleLimitCCW(_id);
   }
 
+  public int error()
+  {
+    return _error;
+  }
+
+  public String errorStr()
+  {
+      return Servo.errorStr(_error);
+  }
+
   public void readTempValues()
   {
 	int curPos = _servo.presentPosition(_id);
 	if(curPos >= 0)
-	  _pos = curPos;
+        {
+            _pos = curPos;
+            _bknColor.set(255,255,255);
+            _error = Servo.DX_ERROR_NO;
+        }
+        else
+        {   // error read
+            _bknColor.set(255,0,0);
+            _error = _servo.error();
+        }
   }
 
   public int id() { return _id; }
@@ -100,8 +123,8 @@ public class ServoViz
     {	
         g.pushStyle();
 
-		// range
-        g.fill(255,255,255,40);
+        // range
+        g.fill(_bknColor.x,_bknColor.y,_bknColor.z,40);
         g.noStroke();
 		g.pushMatrix();
 		g.rotate((float)Math.toRadians(-90.0f - (360.0f - _deadAngle) * .5f));
