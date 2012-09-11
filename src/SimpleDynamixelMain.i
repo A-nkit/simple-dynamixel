@@ -57,6 +57,12 @@ public:
 
     void clear();
 
+    void setReadBlock(bool enable);
+    bool readBlock();
+    void setReadBlockCount(int count);
+    void addReadBlockCount(int count);
+    int  readBlockCount();
+
     //void received(const char *data, unsigned int len);
 
 };

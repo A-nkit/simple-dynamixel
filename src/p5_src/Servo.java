@@ -86,6 +86,10 @@ public class Servo
 
   }
 
+    public final static int DX_SERIALTYPE_ASYNC         = 0;
+    public final static int DX_SERIALTYPE_SYNC          = 1;
+
+
     public final static int DX_BEGIN			= 0xFF;
     public final static int DX_BROADCAST_ID		= 0xFE;
 
@@ -276,14 +280,35 @@ public class Servo
             else
                 return _p5Serial.available();
         }
+
+        public void setReadBlock(boolean enable)
+        {
+            if(_nativeSerial != null)
+                _nativeSerial.setReadBlock(enable);
+                /*
+            else
+                _p5Serial.setReadBlock(enable);
+                */
+        }
+
+        public void addReadBlockCount(int count)
+        {
+            if(_nativeSerial != null)
+                _nativeSerial.addReadBlockCount(count);
+                /*
+            else
+                _p5Serial.setReadBlock(enable);
+                */
+        }
     }
 
 
     protected SerialWrapper 				_serial;
+    protected int                                       _serialType = DX_SERIALTYPE_ASYNC;
     protected ArrayList<Integer>                        _data;
     protected int					_curChecksum;
     protected int					_error;
-    protected int					_timeout = 100;
+    protected int					_timeout = 1000;
     protected int					_delay = 1;
     protected ReturnPacket                              _returnPacket = new ReturnPacket();
     protected boolean                                   _regWriteFlag = false;
@@ -294,7 +319,6 @@ public class Servo
 
     public Servo()
     {
-        loadExtLib();
     }
 
 /*
@@ -313,9 +337,21 @@ public class Servo
 
     public void init(String serialDev,int baudRate)
     {
+        loadExtLib();
+
         _serial = new SerialWrapper(serialDev, baudRate);
         _parent = null;
         _serial.clear();
+    }
+
+    public void setSerialType(int type)
+    {
+        _serialType = type;
+    }
+
+    public int serialType()
+    {
+        return _serialType;
     }
 
     public int error()
@@ -634,6 +670,10 @@ public class Servo
     // watch out, this resets the servo to the default factory settings
     public boolean reset(int id)
     {
+        if(_serialType == DX_SERIALTYPE_SYNC)
+            // block next few bytes for receiving
+            _serial.addReadBlockCount(6);
+
         _curChecksum = 0;
 
         _serial.write(DX_BEGIN);
@@ -664,6 +704,10 @@ public class Servo
 
     public synchronized boolean ping(int id)
     {
+        if(_serialType == DX_SERIALTYPE_SYNC)
+            // block next few bytes for receiving
+            _serial.addReadBlockCount(6);
+
         _curChecksum = 0;
 
         _serial.write(DX_BEGIN);
@@ -734,6 +778,10 @@ public class Servo
 	
     public synchronized boolean action(int id)
     {
+        if(_serialType == DX_SERIALTYPE_SYNC)
+            // block next few bytes for receiving
+            _serial.addReadBlockCount(6);
+
         _curChecksum = 0;
 
         _serial.write(DX_BEGIN);
@@ -784,6 +832,10 @@ public class Servo
 
     public boolean syncWrite(int addr,int length,int[] idList,int[][] dataList)
     {
+        if(_serialType == DX_SERIALTYPE_SYNC)
+            // block next few bytes for receiving
+            _serial.addReadBlockCount(8 + idList.length + idList.length * length);
+
         _curChecksum = 0;
 
         _serial.write(DX_BEGIN);
@@ -1392,6 +1444,10 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
   
     protected synchronized boolean writeData2Bytes(int id,int addr,int data,boolean regWrite)
     {
+        if(_serialType == DX_SERIALTYPE_SYNC)
+            // block next few bytes for receiving
+            _serial.addReadBlockCount(9);
+
         _curChecksum = 0;
 
         _serial.write(DX_BEGIN);
@@ -1441,6 +1497,10 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
 
     protected synchronized boolean writeDataByte(int id,int addr,int data,boolean regWrite)
     {
+        if(_serialType == DX_SERIALTYPE_SYNC)
+            // block next few bytes for receiving
+            _serial.addReadBlockCount(8);
+
         _curChecksum = 0;
 
         _serial.write(DX_BEGIN);
@@ -1455,16 +1515,16 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
         _curChecksum += 1 + 3;  // 3 bytes param
 
         // instruction
-		if(regWrite)
-		{
-		  _serial.write(DX_INST_REG_WRITE);
-		  _curChecksum += DX_INST_REG_WRITE;
-		}
-		else
-		{
-		  _serial.write(DX_INST_WRITE_DATA);
-		  _curChecksum += DX_INST_WRITE_DATA;
-		}
+        if(regWrite)
+        {
+          _serial.write(DX_INST_REG_WRITE);
+          _curChecksum += DX_INST_REG_WRITE;
+        }
+        else
+        {
+          _serial.write(DX_INST_WRITE_DATA);
+          _curChecksum += DX_INST_WRITE_DATA;
+        }
 
         // param - addr
         _serial.write(addr);
@@ -1481,6 +1541,10 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
 
     protected  boolean readData(int id,int addr,int readLength)
     {
+        if(_serialType == DX_SERIALTYPE_SYNC)
+            // block next few bytes for receiving
+            _serial.addReadBlockCount(8);
+
         _curChecksum = 0;
 
         _serial.write(DX_BEGIN);
@@ -1507,13 +1571,13 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
 
         // checksum
         _serial.write(calcChecksum(_curChecksum));
-        return true;
 
+        return true;
     }
 	
-	public int lastError() { return _error; }
+    public int lastError() { return _error; }
 
-	public ReturnPacket returnPacket() { return _returnPacket; }
+    public ReturnPacket returnPacket() { return _returnPacket; }
 
     protected boolean handleReturnStatus(int id)
     {
@@ -1619,8 +1683,8 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
         return true;
     }
 
-        public static boolean waitForData(SerialWrapper serial,int timeout,int delay,int dataCount)
-	{
+    public static boolean waitForData(SerialWrapper serial,int timeout,int delay,int dataCount)
+    {
         while(serial.available() < dataCount && (timeout--) >=0)
         {
             if(locSleep(delay) == false)
@@ -1629,8 +1693,8 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
 
         if(timeout < 0 && serial.available() < dataCount)
             return false;
-		return true;
-	}
+        return true;
+    }
 
     public final static int calcChecksum(int checksumVal)
     {
@@ -1643,7 +1707,7 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
         {
             //Thread.sleep(delay);
             //Thread.sleep(0,delay*10);
-            Thread.sleep(0,1);
+            Thread.sleep(delay);
         }
         catch(InterruptedException excetpion)
         {
@@ -1655,34 +1719,43 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
 
     public static String errorStr(int error)
     {
-        switch(error)
-        {
-        case DX_ERROR_INVOLT:
-            return "Input Voltage Error";
-        case DX_ERROR_ANGLELIMIT:
-            return "Angle Limit Error";
-        case DX_ERROR_OVERHEAT:
-            return "OverHeating Error";
-        case DX_ERROR_RANGE:
-            return "Range Error";
-        case DX_ERROR_CHECKSUM:
-            return "CheckSum Error";
-        case DX_ERROR_OVERLOAD:
-            return "Overload";
-        case DX_ERROR_INST:
-            return "Instruction Error";
+        String retStr = new String();
 
-        case DX_ERROR_USR_ID:
-            return "Status Packet - Wrong id";
-        case DX_ERROR_USR_READSTATUS:
-            return "Status Packet - ";
-        case DX_ERROR_USR_NO_BEGIN:
-            return "Status Packet - No begin found";
-        case DX_ERROR_USR_DATA_TIMEOUT:
-            return "Status Packet - Data timeout";
-        default:
-            return "No error";
-        }
+        if((error & DX_ERROR_INVOLT) > 0)
+            retStr += "Input Voltage Error\n";
+
+        if((error & DX_ERROR_ANGLELIMIT) > 0)
+            retStr += "Angle Limit Error\n";
+
+        if((error & DX_ERROR_OVERHEAT) > 0)
+            retStr += "OverHeating Error\n";
+
+        if((error & DX_ERROR_RANGE) > 0)
+            retStr += "Range Error\n";
+
+        if((error & DX_ERROR_CHECKSUM) > 0)
+            retStr += "CheckSum Error\n";
+
+        if((error & DX_ERROR_OVERLOAD) > 0)
+            retStr += "Overload Error\n";
+
+        if((error & DX_ERROR_INST) > 0)
+            retStr += "Instruction  Error\n";
+
+
+        if((error & DX_ERROR_USR_ID) > 0)
+            retStr += "Status Packet - Wrong id\n";
+
+        if((error & DX_ERROR_USR_READSTATUS) > 0)
+            retStr += "Status Packet - \n";
+
+        if((error & DX_ERROR_USR_NO_BEGIN) > 0)
+            retStr += "Status Packet - No begin found\n";
+
+        if((error & DX_ERROR_USR_DATA_TIMEOUT) > 0)
+            retStr += "Status Packet - Data timeout\n";
+
+        return retStr;
     }
 
 }
