@@ -126,7 +126,13 @@ public class Servo
     public final static int DX_CMD_DELAYTIME		= 0x05;
     public final static int DX_CMD_CW_ANGLE_LIMIT	= 0x06;
     public final static int DX_CMD_CCW_ANGLE_LIMIT      = 0x08;
+    public final static int DX_CMD_HIGH_LIMIT_TEMP      = 0x0B;
+    public final static int DX_CMD_LOW_LIMIT_VOLT       = 0x0C;
+    public final static int DX_CMD_HIGH_LIMIT_VOLT      = 0x0D;
+    public final static int DX_CMD_MAX_TORQUE           = 0x0E;
     public final static int DX_CMD_STATUSRETURNLEVEL    = 0x10;
+    public final static int DX_CMD_ALARM_LED            = 0x11;
+    public final static int DX_CMD_ALARM_SHUTDOWN       = 0x12;
     public final static int DX_CMD_TORQUE_ENABLE	= 0x18;
     public final static int DX_CMD_LED_ENABLE		= 0x19;
     public final static int DX_CMD_D_GAIN		= 0x1A;
@@ -134,13 +140,15 @@ public class Servo
     public final static int DX_CMD_P_GAIN		= 0x1C;
     public final static int DX_CMD_GOAL_POS		= 0x1E;
     public final static int DX_CMD_MOV_SPEED		= 0x20;
+    public final static int DX_CMD_LIMIT_TORQUE		= 0x22;
     public final static int DX_CMD_PRESENT_POS		= 0x24;
     public final static int DX_CMD_PRESENT_SPEED	= 0x26;
     public final static int DX_CMD_PRESENT_LOAD		= 0x28;
     public final static int DX_CMD_PRESENT_VOLT		= 0x2A;
     public final static int DX_CMD_PRESENT_TEMP		= 0x2B;
+    public final static int DX_CMD_REGISTER		= 0x2C;
+    public final static int DX_CMD_LOCK 		= 0x2F;
 
-    public final static int DX_CMD_MAX_TORQUE		= 0x0E;
 
     public final static int DX_CMD_COMPLIANCE_MARGIN_CW	= 0x1A;
     public final static int DX_CMD_COMPLIANCE_MARGIN_CCW= 0x1B;
@@ -455,6 +463,90 @@ public class Servo
             return -1;
     }
 
+    public boolean setHighLimitTemp(int id,int limitTemp)
+    {
+        writeDataByte(id,DX_CMD_HIGH_LIMIT_TEMP,limitTemp);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int highLimitTemp(int id)
+    {
+        readData(id,DX_CMD_HIGH_LIMIT_TEMP,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
+    public boolean setLowLimitVolt(int id,int limitVolt)
+    {
+        writeDataByte(id,DX_CMD_LOW_LIMIT_VOLT,limitVolt);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int lowLimitVolt(int id)
+    {
+        readData(id,DX_CMD_LOW_LIMIT_VOLT,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
+    public boolean setHightLimitVolt(int id,int limitVolt)
+    {
+        writeDataByte(id,DX_CMD_HIGH_LIMIT_VOLT,limitVolt);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int highLimitVolt(int id)
+    {
+        readData(id,DX_CMD_HIGH_LIMIT_VOLT,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
+    public boolean setMaxTorque(int id,int maxTorque)
+    {
+        writeData2Bytes(id,DX_CMD_MAX_TORQUE,maxTorque,_regWriteFlag);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int maxTorque(int id)
+    {
+        readData(id,DX_CMD_MAX_TORQUE,2);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 2)
+                return -1;
+            return((_returnPacket.param.get(1).intValue() << 8) + _returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
     public boolean setStatusReturnLevel(int id,int statusReturnLevel)
     {
         if(statusReturnLevel >= 3)
@@ -477,6 +569,49 @@ public class Servo
         else
             return -1;
     }
+
+    public boolean setAlarmLed(int id,int alarmLed)
+    {
+        writeDataByte(id,DX_CMD_ALARM_LED,alarmLed);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int alarmLed(int id)
+    {
+        readData(id,DX_CMD_ALARM_LED,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
+    public boolean setAlarmShutdown(int id,int alarmShutdown)
+    {
+        writeDataByte(id,DX_CMD_ALARM_SHUTDOWN,alarmShutdown);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int alarmShutdown(int id)
+    {
+        readData(id,DX_CMD_ALARM_SHUTDOWN,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
 /*
     public synchronized boolean ping(int id,int timeout)
 	{
@@ -838,6 +973,28 @@ public class Servo
             return -1;
     }
 
+    public boolean setTorqueLimit(int id,int torqueLimit)
+    {
+        writeData2Bytes(id,DX_CMD_LIMIT_TORQUE,torqueLimit,_regWriteFlag);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int torqueLimit(int id)
+    {
+        readData(id,DX_CMD_LIMIT_TORQUE,2);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 2)
+                return -1;
+            return((_returnPacket.param.get(1).intValue() << 8) + _returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
+    // mx commands
     public boolean setDGain(int id,int gain)
     {
         writeDataByte(id,DX_CMD_D_GAIN,gain,_regWriteFlag);
@@ -880,7 +1037,6 @@ public class Servo
             return -1;
     }
 
-
     public boolean setPGain(int id,int gain)
     {
         writeDataByte(id,DX_CMD_P_GAIN,gain,_regWriteFlag);
@@ -901,6 +1057,92 @@ public class Servo
         else
             return -1;
     }
+
+    // ax commands
+    public boolean setComplianceMarginCW(int id,int value)
+    {
+        writeDataByte(id,DX_CMD_COMPLIANCE_MARGIN_CW,value,_regWriteFlag);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int complianceMarginCW(int id)
+    {
+        readData(id,DX_CMD_COMPLIANCE_MARGIN_CW,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
+    public boolean setComplianceMarginCCW(int id,int value)
+    {
+        writeDataByte(id,DX_CMD_COMPLIANCE_MARGIN_CCW,value,_regWriteFlag);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int complianceMarginCCW(int id)
+    {
+        readData(id,DX_CMD_COMPLIANCE_MARGIN_CCW,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
+    public boolean setComplianceSlopeCW(int id,int value)
+    {
+        writeDataByte(id,DX_CMD_COMPLIANCE_SLOPE_CW,value,_regWriteFlag);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int complianceSlopeCW(int id)
+    {
+        readData(id,DX_CMD_COMPLIANCE_SLOPE_CW,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
+    public boolean setComplianceSlopeCCW(int id,int value)
+    {
+        writeDataByte(id,DX_CMD_COMPLIANCE_SLOPE_CCW,value,_regWriteFlag);
+
+        // handle reply
+        return handleReturnStatus(id);
+    }
+
+    public int complianceSlopeCCW(int id)
+    {
+        readData(id,DX_CMD_COMPLIANCE_SLOPE_CCW,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return -1;
+            return(_returnPacket.param.get(0).intValue());
+        }
+        else
+            return -1;
+    }
+
 
     public boolean setGoalPosition(int id,int pos)
     {
@@ -1002,6 +1244,20 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
             return -1;
     }
 		
+    public boolean register(int id)
+    {
+        readData(id,DX_CMD_REGISTER,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return false;
+            return(_returnPacket.param.get(0).intValue() > 0);
+        }
+        else
+            return false;
+    }
+
+
     public boolean moving(int id)
     {
         readData(id,DX_CMD_MOVING,1);
@@ -1014,7 +1270,7 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
         else
             return false;
     }
-	
+
 
     public boolean setTorqueEnable(int id,boolean enable)
     {
@@ -1030,6 +1286,30 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
     public boolean torqueEnable(int id)
     {
         readData(id,DX_CMD_TORQUE_ENABLE,1);
+        if(handleReturnStatus(id))
+        {
+            if(_returnPacket.param.size() != 1)
+                return false;
+                        return(_returnPacket.param.get(0).intValue() > 0);
+        }
+        else
+            return false;
+    }
+
+    public boolean setLock(int id,boolean enable)
+    {
+      if(enable)
+            writeDataByte(id,DX_CMD_LOCK,1,_regWriteFlag);
+      else
+            writeDataByte(id,DX_CMD_LOCK,0,_regWriteFlag);
+
+      // handle reply
+      return handleReturnStatus(id);
+    }
+
+    public boolean lock(int id)
+    {
+        readData(id,DX_CMD_LOCK,1);
         if(handleReturnStatus(id))
         {
             if(_returnPacket.param.size() != 1)
