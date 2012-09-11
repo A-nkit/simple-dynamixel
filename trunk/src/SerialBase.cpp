@@ -23,11 +23,14 @@
 
 #include "SerialBase.h"
 
+#include <iostream>
 
 SerialBase::SerialBase():
     _open(false),
     _serialPort(NULL),
-    _circularBuffer(MAX_BUFFER_SIZE)
+    _circularBuffer(MAX_BUFFER_SIZE),
+    _readBlock(false),
+    _readBlockCount(0)
 {}
 
 SerialBase::~SerialBase()
@@ -40,7 +43,6 @@ bool SerialBase::open(const char* serialPortName,unsigned long baudRate)
 {
     if(_open)
         return true;
-
     try{
         _serialPort = new CallbackAsyncSerial(std::string(serialPortName),baudRate);
         _serialPort->setCallback(boost::bind( &SerialBase::received,this,_1,_2 ));
@@ -122,13 +124,78 @@ void SerialBase::clear()
     boost::mutex::scoped_lock l(_readMutex);
 
     _circularBuffer.clear();
+}
 
+void SerialBase::setReadBlock(bool enable)
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    std::cout << "setReadBlock :"<< enable << std::endl;
+    _readBlock = enable;
+}
+
+bool SerialBase::readBlock()
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    return _readBlock;
+}
+
+void SerialBase::setReadBlockCount(int count)
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    _readBlockCount = count;
+}
+
+void SerialBase::addReadBlockCount(int count)
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    _readBlockCount += count;
+}
+
+int  SerialBase::readBlockCount()
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    return _readBlockCount;
 }
 
 void SerialBase::received(const char *data, unsigned int len)
 {
     boost::mutex::scoped_lock l(_readMutex);
 
+/*
+    int startIndex = 0;
+    if(_readBlockCount > 0)
+    {
+
+        std::cout << "--------------- dont read" << std::endl;
+        for(int i=0;i < _readBlockCount && i <len ;i++)
+        {
+            std::cout << " Ox" << std::hex << (int)(data[i] & 0xff) << "," << std::dec << (int)(data[i] & 0xff) << "|" << std::flush;
+        }
+        std::cout << "xxxxxxxxxxxx dont read" << std::endl;
+
+
+        if(_readBlockCount >= len)
+            _readBlockCount -= len;
+        else
+        {
+            startIndex = _readBlockCount;
+            len -= _readBlockCount;
+
+            _readBlockCount = 0;
+        }
+
+        return;
+    }
+
+
+    for(int i=startIndex;i < len;i++)
+    {
+        std::cout << " Ox" << std::hex << (int)(data[i] & 0xff) << "," << std::dec << (int)(data[i] & 0xff) << "|" << std::flush;
+        _circularBuffer.push_back(data[i]);
+    }
+    std::cout << std::endl;
+*/
     for(int i=0;i < len;i++)
         _circularBuffer.push_back(data[i]);
+
 }

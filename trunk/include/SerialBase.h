@@ -25,7 +25,6 @@
 #define	SERIALBASE_H
 
 #include <vector>
-#include <iostream>
 
 // boost
 #include <boost/thread.hpp>
@@ -61,6 +60,13 @@ public:
 
     void received(const char *data, unsigned int len);
 
+    void setReadBlock(bool enable);
+    bool readBlock();
+
+    void setReadBlockCount(int count);
+    void addReadBlockCount(int count);
+    int  readBlockCount();
+
 protected:
 
     bool            _open;
@@ -74,6 +80,8 @@ protected:
     boost::mutex            _readMutex;
     boost::mutex            _writeMutex;
 
+    bool                    _readBlock;
+    int                     _readBlockCount;
 
 };
 
