@@ -98,6 +98,7 @@ public class Servo
     public final static int DX_RET_ERROR_CHECKSUM	= 3;  // can't find start
 
     // errors
+    public final static int DX_ERROR_NO 		= 0;
     public final static int DX_ERROR_INVOLT		= 1 << 0;
     public final static int DX_ERROR_ANGLELIMIT		= 1 << 1;
     public final static int DX_ERROR_OVERHEAT		= 1 << 2;
@@ -108,6 +109,8 @@ public class Servo
 
     public final static int DX_ERROR_USR_ID		= 1 << 10;
     public final static int DX_ERROR_USR_READSTATUS     = 1 << 11;
+    public final static int DX_ERROR_USR_NO_BEGIN       = 1 << 12;
+    public final static int DX_ERROR_USR_DATA_TIMEOUT   = 1 << 13;
 
     // Instructions
     public final static int DX_INST_PING		= 0x01;
@@ -313,6 +316,16 @@ public class Servo
         _serial = new SerialWrapper(serialDev, baudRate);
         _parent = null;
         _serial.clear();
+    }
+
+    public int error()
+    {
+        return _error;
+    }
+
+    public String errorStr()
+    {
+        return errorStr(_error);
     }
 
     public SerialWrapper serial() { return _serial; }
@@ -675,7 +688,7 @@ public class Servo
 
         // handle reply
         int oldTimeout = _timeout;
-        _timeout = 50;
+        _timeout = 80;
         boolean ret = handleReturnStatus(id);
         _timeout = oldTimeout;
 
@@ -1185,11 +1198,17 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
         if(handleReturnStatus(id))
         {
             if(_returnPacket.param.size() != 2)
-			  return -1;
+            {
+                //System.out.println("less parameter error: " + errorStr(_error));
+                return -1;
+            }
             return((_returnPacket.param.get(1).intValue() << 8) + _returnPacket.param.get(0).intValue());
         }
         else
+        {
+            //System.out.println("handleReturnStatus error: " + errorStr(_error));
             return -1;
+        }
     }
 	
     public int presentSpeed(int id)
@@ -1499,17 +1518,14 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
     protected boolean handleReturnStatus(int id)
     {
         if(readStatus(_returnPacket) == false)
-        {
-		  _error = DX_ERROR_USR_READSTATUS;
-		  return false;
-		}
+            return false;
 
         _error = _returnPacket.error;
         if(_returnPacket.id != id || _error != 0)
         {
-		  _error |= DX_ERROR_USR_ID;
-		  return false;
-		}
+            _error |= DX_ERROR_USR_ID;
+            return false;
+        }
         else
             return true;
     }
@@ -1518,9 +1534,9 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
     {
         if(readStatus(_returnPacket) == false)
         {
-		  _error = DX_ERROR_USR_READSTATUS;
-		  return false;
-		}
+            _error = DX_ERROR_USR_READSTATUS;
+            return false;
+        }
 
         _error = _returnPacket.error;
         return true;
@@ -1529,10 +1545,16 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
     protected synchronized boolean readStatus(ReturnPacket returnPacket)
     {
         if(readStart(_timeout) == false)
+        {
+            _error |= DX_ERROR_USR_NO_BEGIN;
             return false;
+        }
 
-		if(waitForData(_serial,_timeout,_delay,3) == false)
-		  return false;
+        if(waitForData(_serial,_timeout,_delay,3) == false)
+        {
+            _error |= DX_ERROR_USR_DATA_TIMEOUT;
+            return false;
+        }
 
         _curChecksum = 0;
 
@@ -1545,9 +1567,12 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
         // read error
         returnPacket.error = _serial.read();
 
-		// wait for the rest of the data
-		if(waitForData(_serial,_timeout,_delay,returnPacket.length - 1) == false)
-		  return false;
+        // wait for the rest of the data
+        if(waitForData(_serial,_timeout,_delay,returnPacket.length - 1) == false)
+        {
+            _error |= DX_ERROR_USR_DATA_TIMEOUT;
+            return false;
+        }
 
         // read param
         returnPacket.param.clear();
@@ -1559,38 +1584,37 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
 
     protected boolean readStart(int timeout)
     {
-       _error = 0;
+        _error = 0;
 		
-		int origTimeout = timeout;
-		int failCount = 30;
+        int origTimeout = timeout;
+        int failCount = 100;
 
-		// read all the data till the first 0xff
-		timeout = origTimeout;
-		while(failCount > 0)
-		{
-		  timeout = origTimeout;
-		  if(waitForData(_serial,timeout,_delay,1) == false)
-			return false;
+        // read all the data till the first 0xff
+        timeout = origTimeout;
+        while(failCount > 0)
+        {
+          timeout = origTimeout;
+          if(waitForData(_serial,timeout,_delay,1) == false)
+                return false;
 
-		  if(_serial.read() == DX_BEGIN)
-			break;
-		  else
-			failCount--;
-		}
+          if(_serial.read() == DX_BEGIN)
+                break;
+          else
+                failCount--;
+        }
 
-		// second begin
-		timeout = origTimeout;
-		if(waitForData(_serial,timeout,_delay,1) == false)
-		  return false;
+        // second begin
+        timeout = origTimeout;
+        if(waitForData(_serial,timeout,_delay,1) == false)
+            return false;
 
         if(_serial.read() != DX_BEGIN)
             return false;
 
-
-		// data
-		timeout = origTimeout;
-		if(waitForData(_serial,timeout,_delay,4) == false)
-		  return false;
+        // data
+        timeout = origTimeout;
+        if(waitForData(_serial,timeout,_delay,4) == false)
+            return false;
 
         return true;
     }
@@ -1627,6 +1651,38 @@ System.out.println("xxx readtime:" + (System.currentTimeMillis()- startTime));
             return false;
         }
         return true;
+    }
+
+    public static String errorStr(int error)
+    {
+        switch(error)
+        {
+        case DX_ERROR_INVOLT:
+            return "Input Voltage Error";
+        case DX_ERROR_ANGLELIMIT:
+            return "Angle Limit Error";
+        case DX_ERROR_OVERHEAT:
+            return "OverHeating Error";
+        case DX_ERROR_RANGE:
+            return "Range Error";
+        case DX_ERROR_CHECKSUM:
+            return "CheckSum Error";
+        case DX_ERROR_OVERLOAD:
+            return "Overload";
+        case DX_ERROR_INST:
+            return "Instruction Error";
+
+        case DX_ERROR_USR_ID:
+            return "Status Packet - Wrong id";
+        case DX_ERROR_USR_READSTATUS:
+            return "Status Packet - ";
+        case DX_ERROR_USR_NO_BEGIN:
+            return "Status Packet - No begin found";
+        case DX_ERROR_USR_DATA_TIMEOUT:
+            return "Status Packet - Data timeout";
+        default:
+            return "No error";
+        }
     }
 
 }
