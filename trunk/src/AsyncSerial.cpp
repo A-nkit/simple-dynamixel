@@ -357,6 +357,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     new_attributes.c_cc[VMIN]=1;// Minimum number of characters to read before returning error
     new_attributes.c_cc[VTIME]=1;// Set timeouts in tenths of second
 
+    /*
     // Set baud rate
     switch(baud_rate)
     {
@@ -397,9 +398,10 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
                         boost::system::error_code(),"Unsupported baud rate"));
         }
     }
+    */
 
-    cfsetospeed(&new_attributes,speed);
-    cfsetispeed(&new_attributes,speed);
+    cfsetospeed(&new_attributes,(speed_t)baud_rate);
+    cfsetispeed(&new_attributes,(speed_t)baud_rate);
 
     //Make changes effective
     status=tcsetattr(pimpl->fd, TCSANOW, &new_attributes);
