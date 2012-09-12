@@ -28,7 +28,7 @@ echo "--- generate cmake ---"
 cmake -DCMAKE_BUILD_TYPE=Release \
 	  -DEIGEN3D_INCLUDE=/usr/local/include/eigen3/ \
 	  -DP5_JAR=/Applications/Processing.app/Contents/Resources/Java/core.jar \
-          -DP5_JAR_SERIAL=~/Applications/Processing.app/Contents/Resources/modes/java/libraries/serial/library/serial.jar \
+          -DP5_JAR_SERIAL=~/Applications/Processing.app/Contents/Resources/Java/modes/java/libraries/serial/library/serial.jar \
           -DCMAKE_OSX_ARCHITECTURES="i386;x86_64" \
 	  ..
 
