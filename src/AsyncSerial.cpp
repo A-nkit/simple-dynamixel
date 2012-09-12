@@ -368,6 +368,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
         std::cout << "tcgetattr(pimpl->fd, &options)" << std::endl;
 
     // setting raw-mode allows the use of tcsetattr() and ioctl()
+    /*
     options.c_iflag = IGNBRK;
     options.c_oflag = 0;
     options.c_lflag = 0;
@@ -375,6 +376,13 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
 
     options.c_cc[VMIN]=1;// Minimum number of characters to read before returning error
     options.c_cc[VTIME]=1;// Set timeouts in tenths of second
+    */
+    options->c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+    options->c_oflag &= ~OPOST;
+    options->c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    options->c_cflag &= ~(CSIZE | PARENB);
+    options->c_cflag |= CS8;
+
 
     status = tcsetattr(pimpl->fd, TCSANOW, &options);
     if(status < 0)
