@@ -372,9 +372,9 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     if(status < 0)
         std::cout << "cfmakeraw(&options)" << std::endl;
 
-    status = tcsetattr(serialFileDescriptor, TCSANOW, &options);
+    status = tcsetattr(pimpl->fd, TCSANOW, &options);
     if(status < 0)
-        std::cout << "tcsetattr(serialFileDescriptor, TCSANOW, &options)" << std::endl;
+        std::cout << "tcsetattr(pimpl->fd, TCSANOW, &options)" << std::endl;
 
     // specify any arbitrary baud rate
     int new_baud = static_cast<int> (baud_rate);
