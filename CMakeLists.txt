@@ -168,9 +168,7 @@ set(P5_JAR_SERIAL "${P5_JAR_SERIAL}")
 
 # get full paths, otherwise javac/javadoc has problems with multiple jar locations
 GET_FILENAME_COMPONENT(P5_JAR "${P5_JAR}" ABSOLUTE)
-message("1 P5_JAR_SERIAL=" ${P5_JAR_SERIAL})
 GET_FILENAME_COMPONENT(P5_JAR_SERIAL "${P5_JAR_SERIAL}" ABSOLUTE)
-message("2 P5_JAR_SERIAL=" ${P5_JAR_SERIAL})
 
 ADD_CUSTOM_COMMAND(TARGET SimpleDynamixel
 				   POST_BUILD
