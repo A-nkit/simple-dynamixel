@@ -365,7 +365,8 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     cfmakeraw(&options);
 
     // specify any arbitrary baud rate
-    ioctl(pimpl->fd, IOSSIOSPEED, &baud_rate);
+    int new_baud = static_cast<int> (baud_rate);
+    ioctl(pimpl->fd, IOSSIOSPEED, &new_baud);
 
 
     
