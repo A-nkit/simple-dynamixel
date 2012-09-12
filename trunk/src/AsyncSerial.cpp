@@ -368,10 +368,11 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
         std::cout << "tcgetattr(pimpl->fd, &options)" << std::endl;
 
     // setting raw-mode allows the use of tcsetattr() and ioctl()
-    status = cfmakeraw(&options);
+    cfmakeraw(&options);
+    /*
     if(status < 0)
         std::cout << "cfmakeraw(&options)" << std::endl;
-
+    */
     status = tcsetattr(pimpl->fd, TCSANOW, &options);
     if(status < 0)
         std::cout << "tcsetattr(pimpl->fd, TCSANOW, &options)" << std::endl;
