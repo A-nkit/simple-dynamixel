@@ -341,6 +341,9 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     if (pimpl->fd<0) throw(boost::system::system_error(
             boost::system::error_code(),"Failed to open port"));
     
+
+    ioctl(pimpl->fd, TIOCEXCL);///////////////////////////////////
+
     // Set Port parameters.
     status=tcgetattr(pimpl->fd,&new_attributes);
     if(status<0  || !isatty(pimpl->fd))
