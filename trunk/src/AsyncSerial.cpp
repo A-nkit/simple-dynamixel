@@ -360,7 +360,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     new_attributes.c_cc[VMIN]=1;// Minimum number of characters to read before returning error
     new_attributes.c_cc[VTIME]=1;// Set timeouts in tenths of second
 
-    /*
+    bool customBaudRate = false;
     // Set baud rate
     switch(baud_rate)
     {
@@ -383,30 +383,72 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
         case 115200:speed= B115200; break;
         case 230400:speed= B230400; break;
 
-        case 460800:speed= B460800; break;
-        case 500000:speed= B500000; break;
-        case 576000:speed= B576000; break;
-        case 921600:speed= B921600; break;
-        case 1000000:speed= B1000000; break;
-        case 1152000:speed= B1152000; break;
-        case 2000000:speed= B2000000; break;
-        case 3000000:speed= B3000000; break;
-        case 3500000:speed= B3500000; break;
-        case 4000000:speed= B4000000; break;
+        #ifdef B460800
+          case 460800: speed = B460800; break;
+        #endif
+        #ifdef B921600
+          case 921600: speed = B921600; break;
+        #endif
+        #ifdef B1000000
+          case 1000000: speed = B1000000; break;
+        #endif
+        #ifdef B1152000
+          case 1152000: speed = B1152000; break;
+        #endif
+        #ifdef B1500000
+          case 1500000: speed = B1500000; break;
+        #endif
+        #ifdef B2000000
+          case 2000000: speed = B2000000; break;
+        #endif
+        #ifdef B2500000
+          case 2500000: speed = B2500000; break;
+        #endif
+        #ifdef B3000000
+          case 3000000: speed = B3000000; break;
+        #endif
+        #ifdef B3500000
+          case 3500000: speed = B3500000; break;
+        #endif
+        #ifdef B4000000
+          case 4000000: speed = B4000000; break;
+        #endif
+          default:
+            // set custom baudrate
+            customBaudRate = true;
+            #define IOSSIOSPEED _IOW('T', 2, speed_t)
 
+                int new_baud = static_cast<int> (baud_rate);
+                if (ioctl (pimpl->fd, IOSSIOSPEED, &new_baud, 1) < 0)
+                {
+                    ::close(pimpl->fd);
+                    throw(boost::system::system_error(
+                                boost::system::error_code(),"Unsupported baud rate"));
+                }
+
+            break;
+         /*
         default:
         {
             ::close(pimpl->fd);
             throw(boost::system::system_error(
                         boost::system::error_code(),"Unsupported baud rate"));
         }
+        */
     }
-    */
+
+
+
+
     std::cout << "XX set baudrate: " << baud_rate << std::endl;
 
+    if (custom_baud == false)
+    {
+        cfsetospeed(&new_attributes,(speed_t)baud_rate);
+        cfsetispeed(&new_attributes,(speed_t)baud_rate);
+    }
 
-    cfsetospeed(&new_attributes,(speed_t)baud_rate);
-    cfsetispeed(&new_attributes,(speed_t)baud_rate);
+
 
     //Make changes effective
     status=tcsetattr(pimpl->fd, TCSANOW, &new_attributes);
