@@ -69,7 +69,7 @@ ELSE()
   
 	IF(APPLE)
 		# osx
-		set(Boost_LIBRARIES  "boost_thread.a")
+                set(Boost_LIBRARIES  "boost_thread.a" "boost_system.a")
 	ELSEIF(UNIX)
 		# unix/linux,shared libs of boost should be installed
                 set(Boost_LIBRARIES  "boost_thread.a" "boost_system.a")
