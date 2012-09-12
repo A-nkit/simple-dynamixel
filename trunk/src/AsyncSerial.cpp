@@ -421,6 +421,8 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
 
                std::cout << "XX set baudrate: x" << baud_rate << std::endl;
 
+                cfmakeraw(&new_attributes);
+
                 int new_baud = static_cast<int> (baud_rate);
                 if (ioctl (pimpl->fd, IOSSIOSPEED, &new_baud, 1) < 0)
                 {
