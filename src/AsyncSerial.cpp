@@ -441,7 +441,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
 
     std::cout << "XX set baudrate: " << baud_rate << std::endl;
 
-    if (custom_baud == false)
+    if (customBaudRate == false)
     {
         cfsetospeed(&new_attributes,(speed_t)baud_rate);
         cfsetispeed(&new_attributes,(speed_t)baud_rate);
