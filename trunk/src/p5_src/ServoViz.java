@@ -188,7 +188,8 @@ public class ServoViz
         g.text("id: " + _id, posX,posY);
 
 		posY += 20;
-        g.text("angle: " + Float.parseFloat(df.format(Math.toDegrees(_resQ * _pos))), posX,posY);
+//                g.text("angle: " + Float.parseFloat(df.format(Math.toDegrees(_resQ * _pos))), posX,posY);
+                g.text("angle: " + df.format(Math.toDegrees(_resQ * _pos)), posX,posY);
 
 		posY += 20;
         g.text("pos: " + _pos, posX, posY);
