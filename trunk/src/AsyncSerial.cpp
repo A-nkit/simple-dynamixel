@@ -345,7 +345,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     struct termios options;
 
     // open the serial like POSIX C
-    pimpl->fd = open(devname.c_str(),
+    pimpl->fd = ::open(devname.c_str(),
                      O_RDWR |
                      O_NOCTTY |
                      O_NONBLOCK );
