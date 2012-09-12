@@ -89,6 +89,8 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
 {
     if(isOpen()) close();
 
+    std::cout << "set baudrate: " << baud_rate << std::endl;
+
     setErrorStatus(true);//If an exception is thrown, error_ remains true
     pimpl->port.open(devname);
     pimpl->port.set_option(asio::serial_port_base::baud_rate(baud_rate));
