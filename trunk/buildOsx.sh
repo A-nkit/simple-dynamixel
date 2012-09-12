@@ -1,18 +1,16 @@
 #!/bin/sh
 # --------------------------------------------------------------------------
-# buildscript for osx 32bit/64bit
+# buildscript for osx 32/64
 # --------------------------------------------------------------------------
-# Processing Wrapper for the KDL - Kinematic Dynamics Library
-# http://code.google.com/p/simple-kdl
+# Processing Library for the Dynamixel Servo
+# http://code.google.com/p/simple-dynamixel
 # --------------------------------------------------------------------------
-# prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
+# prog:  Max Rheiner / Interaction Design / Zhdk / http://iad.zhdk.ch/
 # date:  08/12/2012 (m/d/y)
 # ----------------------------------------------------------------------------
 # Change those vars to the folders you have on your system:
-#	-DEIGEN3D_INCLUDE 	= folder of Eigen3d headers
 #	-DBOOST_ROOT 		= folder of Boost root
-#	-DBOOST_LIBRARYDIR 	= folder of Boost library folder
-#	-DP5_JAR 			= filepath to your core.jar (Processing)
+#	-DP5_JAR 		= filepath to your core.jar (Processing)
 # ----------------------------------------------------------------------------
 
 
@@ -30,7 +28,8 @@ echo "--- generate cmake ---"
 cmake -DCMAKE_BUILD_TYPE=Release \
 	  -DEIGEN3D_INCLUDE=/usr/local/include/eigen3/ \
 	  -DP5_JAR=/Applications/Processing.app/Contents/Resources/Java/core.jar \
-	  -DCMAKE_OSX_ARCHITECTURES="i386;x86_64" \
+          -DP5_JAR_SERIAL=~/Applications/Processing.app/Contents/Resources/modes/java/libraries/serial/library/serial.jar \
+          -DCMAKE_OSX_ARCHITECTURES="i386;x86_64" \
 	  ..
 
 
@@ -41,8 +40,8 @@ make -j 6 VERBOSE=1
 
 echo "--- copy ---"
 # copy the library
-cp SimpleKDL.jar ../dist/all/SimpleKDL/library
-cp libSimpleKDL.jnilib ../dist/all/SimpleKDL/library
+cp SimpleDynamixel.jar ../dist/all/SimpleDynamixel/library
+cp libSimpleDynamixel.jnilib ../dist/all/SimpleDynamixel/library
 
 # copy the doc
-cp -r ./doc/* ../dist/all/SimpleKDL/documentation/
+cp -r ./doc/* ../dist/all/SimpleDynamixel/documentation/

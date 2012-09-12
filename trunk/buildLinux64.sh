@@ -10,7 +10,7 @@
 # ----------------------------------------------------------------------------
 # Change those vars to the folders you have on your system:
 #	-DBOOST_ROOT 		= folder of Boost root
-#	-DP5_JAR 			= filepath to your core.jar (Processing)
+#	-DP5_JAR 		= filepath to your core.jar (Processing)
 # ----------------------------------------------------------------------------
 
 # optional, but gives a clean build
