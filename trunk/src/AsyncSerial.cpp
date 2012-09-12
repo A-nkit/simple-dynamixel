@@ -31,6 +31,8 @@
 #include <algorithm>
 #include <iostream>
 #include <boost/bind.hpp>
+#include <IOKit/serial/ioss.h>
+
 
 using namespace std;
 using namespace boost;
@@ -415,7 +417,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
           default:
             // set custom baudrate
             customBaudRate = true;
-            #define IOSSIOSPEED _IOW('T', 2, speed_t)
+            //#define IOSSIOSPEED _IOW('T', 2, speed_t)
 
                std::cout << "XX set baudrate: x" << baud_rate << std::endl;
 
