@@ -417,6 +417,8 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
             customBaudRate = true;
             #define IOSSIOSPEED _IOW('T', 2, speed_t)
 
+               std::cout << "XX set baudrate: x" << baud_rate << std::endl;
+
                 int new_baud = static_cast<int> (baud_rate);
                 if (ioctl (pimpl->fd, IOSSIOSPEED, &new_baud, 1) < 0)
                 {
@@ -439,7 +441,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
 
 
 
-    std::cout << "XX set baudrate: " << baud_rate << std::endl;
+
 
     if (customBaudRate == false)
     {
