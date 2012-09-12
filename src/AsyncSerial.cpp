@@ -39,7 +39,8 @@ using namespace boost;
 //Class AsyncSerial
 //
 
-#ifndef __APPLE__
+//#ifndef __APPLE__
+#if 1
 
 class AsyncSerialImpl: private boost::noncopyable
 {
