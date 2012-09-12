@@ -336,12 +336,13 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     speed_t speed;
     int status;
     
+/*
     // Open port
     pimpl->fd=::open(devname.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (pimpl->fd<0) throw(boost::system::system_error(
             boost::system::error_code(),"Failed to open port"));
 
-
+*/
     struct termios options;
 
     // open the serial like POSIX C
@@ -383,11 +384,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     new_attributes.c_oflag = 0;
     new_attributes.c_lflag = 0;
     new_attributes.c_cflag = (CS8 | CREAD | CLOCAL);//8 data bit,Enable receiver,Ignore modem
-    /* In non canonical mode (Ctrl-C and other disabled, no echo,...) VMIN and VTIME work this way:
-    if the function read() has'nt read at least VMIN chars it waits until has read at least VMIN
-    chars (even if VTIME timeout expires); once it has read at least vmin chars, if subsequent
-    chars do not arrive before VTIME expires, it returns error; if a char arrives, it resets the
-    timeout, so the internal timer will again start from zero (for the nex char,if any)*/
+
     new_attributes.c_cc[VMIN]=1;// Minimum number of characters to read before returning error
     new_attributes.c_cc[VTIME]=1;// Set timeouts in tenths of second
 
