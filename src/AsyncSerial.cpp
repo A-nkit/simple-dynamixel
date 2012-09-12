@@ -340,8 +340,35 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     pimpl->fd=::open(devname.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
     if (pimpl->fd<0) throw(boost::system::system_error(
             boost::system::error_code(),"Failed to open port"));
-    
 
+
+    struct termios options;
+
+    // open the serial like POSIX C
+    pimpl->fd = open(devname.c_str(),
+                     O_RDWR |
+                     O_NOCTTY |
+                     O_NONBLOCK );
+
+    // block non-root users from using this port
+    ioctl(pimpl->fd, TIOCEXCL);
+
+    // clear the O_NONBLOCK flag, so that read() will
+    //   block and wait for data.
+    fcntl(pimpl->fd, F_SETFL, 0);
+
+    // grab the options for the serial port
+    tcgetattr(pimpl->fd, &options);
+
+    // setting raw-mode allows the use of tcsetattr() and ioctl()
+    cfmakeraw(&options);
+
+    // specify any arbitrary baud rate
+    ioctl(pimpl->fd, IOSSIOSPEED, &baud_rate);
+
+
+    
+/*
     ioctl(pimpl->fd, TIOCEXCL);///////////////////////////////////
 
     // Set Port parameters.
@@ -435,18 +462,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
                 }
 
             break;
-         /*
-        default:
-        {
-            ::close(pimpl->fd);
-            throw(boost::system::system_error(
-                        boost::system::error_code(),"Unsupported baud rate"));
-        }
-        */
     }
-
-
-
 
 
 
@@ -470,6 +486,10 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     //These 3 lines clear the O_NONBLOCK flag
     status=fcntl(pimpl->fd, F_GETFL, 0);
     if(status!=-1) fcntl(pimpl->fd, F_SETFL, status & ~O_NONBLOCK);
+*/
+
+
+
 
     setErrorStatus(false);//If we get here, no error
     pimpl->open=true; //Port is now open
