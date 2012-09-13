@@ -28,6 +28,147 @@
 SerialBase::SerialBase():
     _open(false),
     _serialPort(NULL),
+    _serial(NULL),
+    _circularBuffer(MAX_BUFFER_SIZE),
+    _readBlock(false),
+    _readBlockCount(0)
+{}
+
+SerialBase::~SerialBase()
+{
+    close();
+}
+
+
+bool SerialBase::open(const char* serialPortName,unsigned long baudRate)
+{
+    if(_open)
+        return true;
+
+    _serial = new serial::Serial(serialPortName,
+                                 baudRate,
+                                 serial::Timeout::simpleTimeout(20));
+    if(_serial->isOpen() == false)
+        return false;
+
+    _open = true;
+    _circularBuffer.clear();
+    return _open;
+}
+
+void SerialBase::close()
+{
+    boost::mutex::scoped_lock l1(_readMutex);
+    boost::mutex::scoped_lock l2(_writeMutex);
+
+    if(_serial)
+    {
+        _serial->close();
+        delete _serial;
+        _serial = NULL;
+    }
+
+    _circularBuffer.clear();
+    _open = false;
+}
+
+int SerialBase::available()
+{
+    boost::mutex::scoped_lock l(_readMutex);
+
+    return _serial->available();
+}
+
+void SerialBase::write(unsigned char byte)
+{
+    if(!_open)
+        return;
+
+    boost::mutex::scoped_lock l(_writeMutex);
+
+    _serial->write (&byte,1);
+}
+
+void SerialBase::write(int byte)
+{
+    uint8_t data = byte;
+    _serial->write (&data,1);
+}
+
+void SerialBase::write(const std::string& str)
+{
+    if(!_open)
+        return;
+
+    boost::mutex::scoped_lock l(_writeMutex);
+
+  //  _serialPort->writeString(str);
+}
+
+int SerialBase::read()
+{
+    if(!_open)
+        return 0;
+
+    boost::mutex::scoped_lock l(_readMutex);
+
+    uint8_t data = 0;
+    _serial->read(&data,1);
+
+    return (int)data;
+}
+
+
+void SerialBase::clear()
+{
+    boost::mutex::scoped_lock l(_readMutex);
+
+    _serial->flush();
+}
+
+void SerialBase::setReadBlock(bool enable)
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    _readBlock = enable;
+}
+
+bool SerialBase::readBlock()
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    return _readBlock;
+}
+
+void SerialBase::setReadBlockCount(int count)
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    _readBlockCount = count;
+}
+
+void SerialBase::addReadBlockCount(int count)
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    _readBlockCount += count;
+}
+
+int  SerialBase::readBlockCount()
+{
+    boost::mutex::scoped_lock l(_readMutex);
+    return _readBlockCount;
+}
+
+void SerialBase::received(const char *data, unsigned int len)
+{
+    boost::mutex::scoped_lock l(_readMutex);
+
+    for(int i=0;i < len;i++)
+        _circularBuffer.push_back(data[i]);
+
+}
+
+/*
+SerialBase::SerialBase():
+    _open(false),
+    _serialPort(NULL),
     _circularBuffer(MAX_BUFFER_SIZE),
     _readBlock(false),
     _readBlockCount(0)
@@ -161,41 +302,42 @@ void SerialBase::received(const char *data, unsigned int len)
 {
     boost::mutex::scoped_lock l(_readMutex);
 
-/*
-    int startIndex = 0;
-    if(_readBlockCount > 0)
-    {
 
-        std::cout << "--------------- dont read" << std::endl;
-        for(int i=0;i < _readBlockCount && i <len ;i++)
-        {
-            std::cout << " Ox" << std::hex << (int)(data[i] & 0xff) << "," << std::dec << (int)(data[i] & 0xff) << "|" << std::flush;
-        }
-        std::cout << "xxxxxxxxxxxx dont read" << std::endl;
+//    int startIndex = 0;
+//    if(_readBlockCount > 0)
+//    {
 
-
-        if(_readBlockCount >= len)
-            _readBlockCount -= len;
-        else
-        {
-            startIndex = _readBlockCount;
-            len -= _readBlockCount;
-
-            _readBlockCount = 0;
-        }
-
-        return;
-    }
+//        std::cout << "--------------- dont read" << std::endl;
+//        for(int i=0;i < _readBlockCount && i <len ;i++)
+//        {
+//            std::cout << " Ox" << std::hex << (int)(data[i] & 0xff) << "," << std::dec << (int)(data[i] & 0xff) << "|" << std::flush;
+//        }
+//        std::cout << "xxxxxxxxxxxx dont read" << std::endl;
 
 
-    for(int i=startIndex;i < len;i++)
-    {
-        std::cout << " Ox" << std::hex << (int)(data[i] & 0xff) << "," << std::dec << (int)(data[i] & 0xff) << "|" << std::flush;
-        _circularBuffer.push_back(data[i]);
-    }
-    std::cout << std::endl;
-*/
+//        if(_readBlockCount >= len)
+//            _readBlockCount -= len;
+//        else
+//        {
+//            startIndex = _readBlockCount;
+//            len -= _readBlockCount;
+
+//            _readBlockCount = 0;
+//        }
+
+//        return;
+//    }
+
+
+//    for(int i=startIndex;i < len;i++)
+//    {
+//        std::cout << " Ox" << std::hex << (int)(data[i] & 0xff) << "," << std::dec << (int)(data[i] & 0xff) << "|" << std::flush;
+//        _circularBuffer.push_back(data[i]);
+//    }
+//    std::cout << std::endl;
+
     for(int i=0;i < len;i++)
         _circularBuffer.push_back(data[i]);
 
 }
+*/

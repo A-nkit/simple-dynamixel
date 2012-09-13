@@ -103,8 +103,8 @@ void draw()
   popMatrix();
 
   // print out the time consumed by the return
-  float timeDif = Float.parseFloat(df.format( (float)totalTime / count / 1000.0f / 1000.0f));
-  text("Readtime/Servo: " + timeDif + " ms",20,20);
+  float timeDif = (float)totalTime / count / 1000.0f / 1000.0f;
+  text("Readtime/Servo: " + df.format(timeDif) + " ms",20,20);
 
   if(count >= resetCount)
   {
