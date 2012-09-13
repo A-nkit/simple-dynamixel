@@ -79,6 +79,12 @@ ELSE()
 ENDIF()
 
 # -----------------------------------------------------------------------------
+# serial library
+
+SET(LIBS "serial.a" "rt")
+
+
+# -----------------------------------------------------------------------------
 # swig 
 SET(CMAKE_SWIG_FLAGS -package SimpleDynamixel)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -31,8 +31,10 @@
 #include <algorithm>
 #include <iostream>
 #include <boost/bind.hpp>
-#include <IOKit/serial/ioss.h>
 
+#ifdef __APPLE__
+#include <IOKit/serial/ioss.h>
+#endif
 
 using namespace std;
 using namespace boost;
