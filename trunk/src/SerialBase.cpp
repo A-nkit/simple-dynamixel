@@ -51,6 +51,9 @@ bool SerialBase::open(const char* serialPortName,unsigned long baudRate)
     if(_serial->isOpen() == false)
         return false;
 
+
+    std::cout << "--------------- SerialBase::open" << std::endl;
+
     _open = true;
     _circularBuffer.clear();
     return _open;
