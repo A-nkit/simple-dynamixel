@@ -350,7 +350,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
                      O_RDWR |
                      O_NOCTTY |
                      O_NONBLOCK );
-
+	
     // block non-root users from using this port
     status = ioctl(pimpl->fd, TIOCEXCL);
     if(status < 0)
@@ -374,7 +374,7 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     options.c_cflag = (CS8 | CREAD | CLOCAL);//8 data bit,Enable receiver,Ignore modem
 
     options.c_cc[VMIN]=1;// Minimum number of characters to read before returning error
-    options.c_cc[VTIME]=0;// Set timeouts in tenths of second
+    options.c_cc[VTIME]=1;// Set timeouts in tenths of second
 
 
     status = tcsetattr(pimpl->fd, TCSANOW, &options);
