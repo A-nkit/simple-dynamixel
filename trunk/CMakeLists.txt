@@ -185,6 +185,8 @@ set(P5_JAR_SERIAL "${P5_JAR_SERIAL}")
 GET_FILENAME_COMPONENT(P5_JAR "${P5_JAR}" ABSOLUTE)
 GET_FILENAME_COMPONENT(P5_JAR_SERIAL "${P5_JAR_SERIAL}" ABSOLUTE)
 
+SET(JAVA_CLASSPATH "\"" ${P5_JAR} "\";\"" ${P5_JAR_SERIAL} "\"")
+
 ADD_CUSTOM_COMMAND(TARGET SimpleDynamixel
 				   POST_BUILD
 				   COMMAND cmake -E echo "-----------------------------"
@@ -195,13 +197,12 @@ ADD_CUSTOM_COMMAND(TARGET SimpleDynamixel
 				   # cmake copy doesn't support wildcards, otherwise it just copies the hidden folder of svn, etc.
 				   # doesn't works on windows backslash
 				   COMMAND cp "${P5_WRAPPER}*.java" "${CMAKE_SWIG_OUTDIR}"
-                                   COMMAND ${JAVA_COMPILE2} -classpath \"${P5_JAR}:${P5_JAR_SERIAL}\" ${CMAKE_SWIG_OUTDIR}/*.java -d ./
-#                                   COMMAND ${JAVA_COMPILE2} -classpath \"${P5_JAR}\" ${CMAKE_SWIG_OUTDIR}/*.java -d ./
-                                   COMMAND cmake -E echo "-----------------------------"
+					COMMAND ${JAVA_COMPILE2} -classpath "${JAVA_CLASSPATH}" ${CMAKE_SWIG_OUTDIR}/*.java -d ./
+                    COMMAND cmake -E echo "-----------------------------"
 				   COMMAND cmake -E echo "Creating jar file..."
 				   COMMAND ${JAVA_ARCHIVE2} cvf SimpleDynamixel.jar SimpleDynamixel
-                                   COMMAND cmake -E echo "-----------------------------"
+                   COMMAND cmake -E echo "-----------------------------"
 				   COMMAND cmake -E echo "Creating doc files..."
 				   COMMAND cmake -E make_directory ./doc
-                                   COMMAND ${JAVA_DOC} -classpath \"${P5_JAR}:${P5_JAR_SERIAL}\" -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${CMAKE_SWIG_OUTDIR}/*.java)
-#                                   COMMAND ${JAVA_DOC} -classpath \"${P5_JAR}\" -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${CMAKE_SWIG_OUTDIR}/*.java)
+                   COMMAND ${JAVA_DOC} -classpath "${JAVA_CLASSPATH}" -quiet -author -public -nodeprecated -nohelp -d ./doc  -version ${CMAKE_SWIG_OUTDIR}/*.java)
+
