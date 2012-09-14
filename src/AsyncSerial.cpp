@@ -354,18 +354,18 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
     // block non-root users from using this port
     status = ioctl(pimpl->fd, TIOCEXCL);
     if(status < 0)
-        std::cout << "ioctl(pimpl->fd, TIOCEXCL)" << std::endl;
+        throw(boost::system::system_error(boost::system::error_code(),"Failed to open port"));
 
     // clear the O_NONBLOCK flag, so that read() will
     //   block and wait for data.
     status = fcntl(pimpl->fd, F_SETFL, 0);
     if(status < 0)
-        std::cout << "fcntl(pimpl->fd, F_SETFL, 0)" << std::endl;
+        throw(boost::system::system_error(boost::system::error_code(),"Failed to open port"));
 
     // grab the options for the serial port
     status = tcgetattr(pimpl->fd, &options);
     if(status < 0)
-        std::cout << "tcgetattr(pimpl->fd, &options)" << std::endl;
+        throw(boost::system::system_error(boost::system::error_code(),"Failed to open port"));
 
     // setting raw-mode allows the use of tcsetattr() and ioctl()
     options.c_iflag = IGNBRK;
@@ -379,13 +379,13 @@ void AsyncSerial::open(const std::string& devname, unsigned int baud_rate,
 
     status = tcsetattr(pimpl->fd, TCSANOW, &options);
     if(status < 0)
-        std::cout << "tcsetattr(pimpl->fd, TCSANOW, &options)" << std::endl;
+        throw(boost::system::system_error(boost::system::error_code(),"Failed to open port"));
 
     // specify any arbitrary baud rate
     int new_baud = static_cast<int> (baud_rate);
     status = ioctl(pimpl->fd, IOSSIOSPEED, &new_baud);
     if(status < 0)
-        std::cout << "ioctl(pimpl->fd, IOSSIOSPEED, &new_baud)" << std::endl;
+        throw(boost::system::system_error(boost::system::error_code(),"Failed to open port"));
 
 
     
