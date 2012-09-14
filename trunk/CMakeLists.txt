@@ -118,7 +118,7 @@ ELSE()
 ENDIF()
 
 IF(WIN32)
-#        SET(P5_JAR_SERIAL "C:/Program Files (x86)/processing-1.2.1/modes/java/libraries/serial/serial.jar")
+#        SET(P5_JAR_SERIAL "C:/Program Files (x86)/processing-1.2.1/modes/java/libraries/serial/libraries/serial.jar")
 #ELSEIF(APPLE)
 #        SET(P5_JAR_SERIAL "/Applications/Processing.app/Contents/Resources/Java/modes/java/libraries/serial/library/serial.jar")
 #ELSE()
