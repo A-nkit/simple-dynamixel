@@ -185,7 +185,12 @@ set(P5_JAR_SERIAL "${P5_JAR_SERIAL}")
 GET_FILENAME_COMPONENT(P5_JAR "${P5_JAR}" ABSOLUTE)
 GET_FILENAME_COMPONENT(P5_JAR_SERIAL "${P5_JAR_SERIAL}" ABSOLUTE)
 
-SET(JAVA_CLASSPATH "\"" ${P5_JAR} "\";\"" ${P5_JAR_SERIAL} "\"")
+IF(UNIX)
+  SET(JAVA_CLASSPATH  ${P5_JAR}:${P5_JAR_SERIAL} )
+ELSE()
+  SET(JAVA_CLASSPATH "\"" ${P5_JAR} "\";\"" ${P5_JAR_SERIAL} "\"")
+ENDIF()
+message(" -- "  ${JAVA_CLASSPATH}) 
 
 ADD_CUSTOM_COMMAND(TARGET SimpleDynamixel
 				   POST_BUILD
@@ -197,7 +202,7 @@ ADD_CUSTOM_COMMAND(TARGET SimpleDynamixel
 				   # cmake copy doesn't support wildcards, otherwise it just copies the hidden folder of svn, etc.
 				   # doesn't works on windows backslash
 				   COMMAND cp "${P5_WRAPPER}*.java" "${CMAKE_SWIG_OUTDIR}"
-					COMMAND ${JAVA_COMPILE2} -classpath "${JAVA_CLASSPATH}" ${CMAKE_SWIG_OUTDIR}/*.java -d ./
+ 					COMMAND ${JAVA_COMPILE2} -classpath "${JAVA_CLASSPATH}" ${CMAKE_SWIG_OUTDIR}/*.java -d ./
                     COMMAND cmake -E echo "-----------------------------"
 				   COMMAND cmake -E echo "Creating jar file..."
 				   COMMAND ${JAVA_ARCHIVE2} cvf SimpleDynamixel.jar SimpleDynamixel
