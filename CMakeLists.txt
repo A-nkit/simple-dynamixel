@@ -81,8 +81,17 @@ ENDIF()
 # -----------------------------------------------------------------------------
 # serial library
 
-SET(LIBS "serial.a" "rt")
-
+IF(NOT DEFINED USE_ASIO)
+    IF(APPLE)
+        SET(LIBS "serial.a" "System.B")
+    ELSEIF(UNIX)
+        SET(LIBS "serial.a" "rt")
+    ELSE()
+        # windows
+    ENDIF()
+ELSE()
+    ADD_DEFINITIONS(-DUSE_ASIO_SERIAL_LIB)
+ENDIF()
 
 # -----------------------------------------------------------------------------
 # swig 
