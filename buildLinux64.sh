@@ -29,7 +29,7 @@ cmake -DCMAKE_BUILD_TYPE=Release \
       -DBOOST_ROOT=~/Documents/development/libs/boost/boost_1_46_1/ \
       -DP5_JAR=~/Documents/localApps/processing-1.5.1/lib/core.jar \
       -DP5_JAR_SERIAL=~/Documents/localApps/processing-1.5.1/modes/java/libraries/serial/library/serial.jar \
-      -DUSE_ASIO=1 \
+      -
       ..
 
 echo "--- build ---"

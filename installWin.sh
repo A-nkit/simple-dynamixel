@@ -1,16 +1,14 @@
 #!/bin/sh
 # --------------------------------------------------------------------------
-# install script for Windows, uses msys
+# buildscript for windows
 # --------------------------------------------------------------------------
-# Processing Wrapper for the KDL - Kinematic Dynamics Library
-# http://code.google.com/p/simple-openni
+# Processing Library for the Dynamixel Servo
+# http://code.google.com/p/simple-dynamixel
 # --------------------------------------------------------------------------
 # prog:  Max Rheiner / Interaction Design / zhdk / http://iad.zhdk.ch/
 # date:  08/12/2012 (m/d/y)
 # ----------------------------------------------------------------------------
-# Change P5_Path to the folder where Processing stores the libraries
-# On Windows it should be in '~/Documents/Processing' (Processing 1.5.1)
-# ----------------------------------------------------------------------------
+
 
 # copy the libs/doc/examples to the processing folders
 P5_Path=~/Documents/Processing
@@ -27,4 +25,4 @@ cp -r ./dist/all/SimpleOpenNI  $P5_Path/libraries/
 cd $P5_Path/libraries/SimpleOpenNI
 rm -rf `find . -type d -name .svn`
 
-echo "--- installed SimpleOpenNI ---"
+echo "--- installed SimpleDynamixel ---"
