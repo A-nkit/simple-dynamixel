@@ -25,6 +25,8 @@
 
 #include <iostream>
 
+#ifndef USE_ASIO_SERIAL_LIB
+
 SerialBase::SerialBase():
     _open(false),
     _serialPort(NULL),
@@ -50,9 +52,6 @@ bool SerialBase::open(const char* serialPortName,unsigned long baudRate)
                                  serial::Timeout::simpleTimeout(20));
     if(_serial->isOpen() == false)
         return false;
-
-
-    std::cout << "--------------- SerialBase::open" << std::endl;
 
     _open = true;
     _circularBuffer.clear();
@@ -165,10 +164,10 @@ void SerialBase::received(const char *data, unsigned int len)
 
     for(int i=0;i < len;i++)
         _circularBuffer.push_back(data[i]);
-
 }
 
-/*
+#else
+
 SerialBase::SerialBase():
     _open(false),
     _serialPort(NULL),
@@ -343,4 +342,5 @@ void SerialBase::received(const char *data, unsigned int len)
         _circularBuffer.push_back(data[i]);
 
 }
-*/
+
+#endif
