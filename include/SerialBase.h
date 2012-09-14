@@ -33,7 +33,10 @@
 #include <boost/circular_buffer.hpp>
 
 #include "AsyncSerial.h"
+
+#ifndef USE_ASIO_SERIAL_LIB
 #include <serial/serial.h>
+#endif
 
 #define  MAX_BUFFER_SIZE (1024)  // 1k buffer
 
@@ -78,8 +81,9 @@ protected:
     boost::circular_buffer<int>     _circularBuffer;
 
     CallbackAsyncSerial*    _serialPort;
+#ifndef USE_ASIO_SERIAL_LIB
     serial::Serial*         _serial;
-
+#endif
     boost::mutex            _readMutex;
     boost::mutex            _writeMutex;
 
