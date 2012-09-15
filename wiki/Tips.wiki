@@ -2,7 +2,9 @@
 
 = Introduction =
 
-Add your content here.
+The FTDI drivers on OSX have a default latency of 16ms. To change this behavior you have to change the driver like described in this [https://www.google.com/url?q=http://www.ftdichip.com/Documents/TechnicalNotes/TN_105%2520Adding%2520Support%2520for%2520New%2520FTDI%2520Devices%2520to%2520Mac%2520Driver.pdf&sa=U&ei=3y1UUO6KIMKk0AWm7IHYAg&ved=0CAYQFjAA&client=internal-uds-cse&usg=AFQjCNGiKAA-8cGM0jMNkrHasvnIyifDqw document].
+
+
 
 
 = Details =
