@@ -7,7 +7,22 @@ The FTDI drivers on OSX have a default latency of 16ms. To change this behavior 
 
 
 
-= Details =
+= Step by Step =
+
+  * Open the terminal and type:
+{{{
+$ sudo bash
+}}}
+  * Download this [http://simple-dynamixel.googlecode.com/svn/trunk/ext/Info.plist.zip file] 
+  * Open the profile file in the driver:
+{{{
+#  
+}}}
+  * 
+  * 
+{{{
+}}}
+
 
 Add your content here.  Format your content with:
   * Text in *bold* or _italic_
