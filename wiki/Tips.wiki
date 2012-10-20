@@ -24,7 +24,7 @@ The FTDI drivers on OSX have a default latency of 16ms. To change this behavior 
 {{{
 $ touch /yourPath/FTDIUSBSerialDriver.kext
 }}}
-  * Copy the driver to this folder
+  * Copy the driver to this system folder
 {{{
 $ sudo cp -r /yourPath/FTDIUSBSerialDriver.kext /System/Library/Extensions/
 }}}
