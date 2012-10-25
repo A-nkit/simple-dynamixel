@@ -151,7 +151,7 @@ public class ServoViz
         g.popMatrix();
 
         // draw pos
-        float angle = _resQ * (_range - _pos);
+        float angle = _resQ * (_range - _pos) + Math.toRadians(_deadAngle) * .5f;
 
         // draw the current pos
         g.strokeWeight(3.0f);
