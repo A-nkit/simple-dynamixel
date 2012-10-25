@@ -434,6 +434,39 @@ public class Servo
         }
     }
 
+    public final static float getMotorDeadAngle(int modelNr)
+    {
+        switch(modelNr)
+        {
+        // dx
+        case DX_TYPE_DX_113:
+        case DX_TYPE_DX_116:
+        case DX_TYPE_DX_117:
+            return 360.0f - 300.0f;
+        // ax
+        case DX_TYPE_AX_12W:
+        case DX_TYPE_AX_12:
+        case DX_TYPE_AX_18:
+            return 360.0f - 300.0f;
+        // rx
+        case DX_TYPE_RX_10:
+        case DX_TYPE_RX_24F:
+        case DX_TYPE_RX_28:
+        case DX_TYPE_RX_64:
+            return 360.0f - 300.0f;
+        // ex
+        case DX_TYPE_EX_104:
+            return 360.0f - 251.0f;
+        // mx
+        case DX_TYPE_MX_28:
+        case DX_TYPE_MX_64:
+        case DX_TYPE_MX_106:
+            return 0.0f;
+        default:
+            return 0.0f;
+        }
+    }
+
     public int modelNr(int id)
     {
         synchronized(_lock)
