@@ -34,7 +34,7 @@ import java.text.DecimalFormat;
 
 public class Servo
 {
-  public final static int SIMPLEDYNAMIXEL_VERSION = 11; // 0011
+  public final static int SIMPLEDYNAMIXEL_VERSION = 12; // 0011
 
   static
   {
